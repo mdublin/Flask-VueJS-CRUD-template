@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>
+    You are not authorized to edit this post
+</h1>
+
+{% endblock %}
+
+
+
+<!-- The form has the method attribute set to POST. This means that when you submit the form it will send the data via a POST request. As the form element does not have an action attribute the request will be sent to the same URL as you used to GET the form.
+ 
+ Inside the form you have two fields, one for the title and one for the content. Notice how both of these fields have the name attribute set. You'll use this name to access the contents of the fields. Finally you have a submit button which you will use to submit the form. -->
+
+<!-- data entered into this form and submitted when clicking the submit button is handled and stored in the blogful db by the add_entry_post() function which is decorated with @app.route("/entry/add", methods=["POST"]) decorator in views.py -->
+

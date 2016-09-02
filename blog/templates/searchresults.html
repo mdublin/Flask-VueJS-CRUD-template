@@ -1,0 +1,59 @@
+<!-- importing macros.html as macros which is a macro used for handling each entry in the blogful db -->
+{% import "CRUD_macros.html" as macros %}
+
+<!-- The extends informs the templating engine that this template “extends” another template, base.html, establishing a link between the templates. This sends what the code below does over to base.html -->
+{% extends "base.html" %}
+
+
+{% block content %}
+
+<div class="container">
+<form action="" method="POST">
+<div class="col-lg-6">
+    <div class="input-group">
+      <input type="text" class="form-control" id="search_form_input" name="search_for_input" placeholder="Search for...">
+      <span class="input-group-btn">
+        <button class="btn btn-default" type="submit">Go!</button>
+      </span>
+    </div><!-- /input-group -->
+  </div><!-- /.col-lg-6 -->
+</form>
+</div>
+
+{% for person in people %}
+
+
+<div class="list-group">
+  <a href="#" class="list-group-item active">
+	  {{ person.firstname }} {{ person.lastname }}
+  </a>
+  <a href="#" class="list-group-item">{{ person.dob }}</a>
+  <a href="#" class="list-group-item">{{ person.zipcode }}</a>
+</div>
+
+
+{% endfor %}
+
+
+<ul class="pager">
+    {% if has_prev %}
+    <li class="previous" >
+    <a href="{{ url_for('viewpeople', page=page - 1) }}">&larr;previous</a>
+    </li>
+    {% endif %}
+    {% if has_next %}
+    <li class="next">
+    <a href="{{ url_for('viewpeople', page=page + 1) }}">&rarr;next</a>
+    </li>
+    {% endif %}
+</ul>
+
+
+<!-- entries object is returned/rendered to this file by entries() in view.py -->
+<!-- entries object is a SQLALchemy session query that's querying entry objects (its type is actually a class). It contains all of our database entries in our Entry table and is iterated through with the for loop below and passed as an argument to the macros.render_entry() function (rendering each one with the render_entry macro) -->
+
+
+
+
+{% endblock %}
+

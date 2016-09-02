@@ -1,0 +1,210 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<script type="text/javascript" src="https://npmcdn.com/vue@1.0.26/dist/vue.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/1000hz-bootstrap-validator/0.11.5/validator.js"></script>
+
+
+<h1>
+    Add Person
+</h1>
+<br></br>
+
+
+
+
+<div class="container" id="app">
+<h2></h2>
+
+<!-- form fields are using HTML5 regex validation via pattern="some HTML5 regex", with error messages called in via Bootstrap Validator via data-toggle="validator"-->
+  <form action="" method="POST" role="form" data-toggle="validator" class="form-horizontal">
+    <div class="form-group">
+      <label class="control-label col-sm-2" for="firstname">First Name:</label>
+	  <div class="col-sm-10">
+		  <!--<input type="text" class="form-control" id="firstname" name="firstname" placeholder="please enter first name here"> --!>
+		  <input v-model="message1" class="form-control" type="text" id="firstname" name="firstname" placeholder="please enter first name here" required>
+      </div>
+  </div>
+
+    <div class="form-group">
+      <label class="control-label col-sm-2" for="lastname">Last Name:</label>
+      <div class="col-sm-10">
+		  <!--<input type="text" class="form-control" id="lastname" name="lastname" placeholder="please enter last name here"> --!>
+		  <input v-model="message2" class="form-control" type="text" id="firstname" name="firstname" placeholder="please enter last name here" required> 
+      </div>
+  </div>
+
+   <div class="form-group">
+      <label class="control-label col-sm-2" for="DOB">DOB:</label>
+      <div class="col-sm-10">
+		  <!-- <input type="text" class="form-control" id="DOB" name="DOB" placeholder="please enter date of birth in month/day/year format"> --!>
+	   <input v-model="message3" class="form-control" type="date" id="firstname" name="firstname" placeholder="please enter your date of birth in MM/DD/YYYY format" pattern="(0[1-9]|1[012])[- /.](0[1-9]|[12][0-9]|3[01])[- /.](19|20)\d\d" required>
+			<div class="help-block with-errors"></div>
+	</div>
+  </div>
+
+
+  <div class="form-group">
+  <label class="control-label col-sm-2" for="Country">Country</label>
+        <div class="col-sm-10">
+			<select class="form-control" name="countrySelectBox" id="countrySelectBox">
+				<!-- obviously not complete-->
+				<option value="US">United States</option>
+				<option value="AU">Australia</option>
+                <option value="AT">Austria</option>
+				<option value="BL">Belgium</option>
+				<option value="BG">Bulgaria</option>
+                <option value="BR">Brazil</option>
+				<option value="CA">Canada</option>
+				<option value="CH">China</option>
+                <option value="DK">Denmark</option>
+                <option value="FR">French</option>
+				<option value="DE">Germany</option>
+				<option value="HG">Hungary</option>
+                <option value="IN">India</option>
+                <option value="IT">Italy</option>
+				<option value="JP">Japan</option>
+                <option value="MA">Morocco</option>
+                <option value="PL">Poland</option>
+                <option value="PT">Portugal</option>
+                <option value="SG">Singapore</option>
+                <option value="ES">Spain</option>
+                <option value="SE">Sweden</option>
+                <option value="CH">Switzerland</option>
+                <option value="GB">United Kingdom</option>
+            </select>
+		</div>
+	</div>
+
+    <div class="form-group">
+       <label class="control-label col-sm-2" for="zipcode">Zip code</label>
+        <div class="col-sm-10">
+			<input type="text" class="form-control" type="number" id="postalCodeInput" name="postalCode" placeholder="please enter the appropriate zicode for your location" pattern="(\d{5}([\-]\d{4})?)" required/>
+			<div class="help-block with-errors"></div>
+        </div>
+	</div>
+
+    <div class="form-group">
+      <div class="col-sm-offset-2 col-sm-10">
+        <button type="submit" class="btn btn-default">Submit</button>
+      </div>
+    </div>
+  </form>
+
+<div class="col-sm-offset-2 col-sm-10">
+<p>FIRST NAME: ${ message1 }</p>
+<p>LAST NAME: ${ message2 }</p>
+<p>DOB: ${ message3 }</p>
+<p>ZIP CODE: ${ message4 }</p>
+</div>
+</div>
+
+
+<script>
+	// changing the built-in Vue delimiter of {{ message }}, which overshadows Jinja's {{ message }}, to ${ message }
+	
+	Vue.config.delimiters = ["${", "}"];
+
+	// instantiate Vue object
+    new Vue({
+        el: '#app',
+        data: {
+            message1: '', message2: '', message3: '', message4: '' 
+        }
+	});
+
+	// event handler for country selection dropdown menu, will push appropriate regex to pattern attribute in input element
+    // escaped regex expressions made possible by: 
+    // http://www.the-art-of-web.com/javascript/escape/
+	var selectionMade = document.getElementById("countrySelectBox");
+	var zipCodeInput = document.getElementById("postalCodeInput");
+	selectionMade.addEventListener("click", function() { 
+		console.log(selectionMade.value);
+		if(selectionMade.value == "US") {
+			console.log("US selected");
+			zipCodeInput.setAttribute("pattern", "(\\d{5}([\\-]\\d{4})?)");
+
+		}
+		else if(selectionMade.value == "AT" || selectionMade.value == "AU" || selectionMade.value == "BG" || selectionMade.value == "BL" || selectionMade.value == "HG" || selectionMade.value == "DK" || selectionMade.value == "CH"){
+			console.log("Austria selected!");
+			zipCodeInput.setAttribute("pattern", "[0-9]{4}");
+		}
+		else if(selectionMade.value == "BR"){
+			console.log("Brazil selected!");
+			zipCodeInput.setAttribute("pattern", "[0-9]{5}[\\-]?[0-9]{3}");
+		}
+		else if(selectionMade.value == "CA"){
+			console.log("Canada selected!");
+     		zipCodeInput.setAttribute("pattern", "[A-Za-z][0-9][A-Za-z] [0-9][A-Za-z][0-9]");
+		}
+		else if(selectionMade.value == "DE" || selectionMade.value == "IT" || selectionMade.value == "MA" || selectionMade.value == "FR"){
+			console.log("Germany or Italy selected!");
+			zipCodeInput.setAttribute("pattern", "[0-9]{5}");
+		}
+		else if(selectionMade.value == "IN" || selectionMade.value == "SG" || selectionMade.value == "CH"){
+			console.log("India selected!");
+			zipCodeInput.setAttribute("pattern", "[0-9]{6}");
+		}
+		else if(selectionMade.value == "JP"){
+			console.log("Japan selected!");
+			zipCodeInput.setAttribute("pattern", "\\d{3}-\\d{4}");
+		}
+		else if(selectionMade.value == "PL"){
+			console.log("Poland selected!");
+			zipCodeInput.setAttribute("pattern", "[0-9]{2}\\-[0-9]{3}");
+		}
+		else if(selectionMade.value == "ES"){
+			console.log("Spain selected!");
+			zipCodeInput.setAttribute("pattern", "((0[1-9]|5[0-2])|[1-4][0-9])[0-9]{3}");
+		}
+		else if(selectionMade.value == "SE"){
+			console.log("Sweden selected!");
+			zipCodeInput.setAttribute("pattern", "\\d{3}\\s?\\d{2}");
+		}
+		else if(selectionMade.value == "GB"){
+			console.log("United Kingdom selected!");
+			zipCodeInput.setAttribute("pattern", "[A-Za-z]{1,2}[0-9Rr][0-9A-Za-z]? [0-9][ABD-HJLNP-UW-Zabd-hjlnp-uw-z]{2}")	
+		}
+
+	});
+
+
+
+</script>
+
+
+
+
+
+
+
+
+
+<!-- button colors should be either:
+
+#09cfc0
+#1dc
+darkturquoise
+hsl(175,91,42)
+rgb(9,207,192)
+
+or: 
+
+#ef3f42
+#f44
+tomato
+hsl(358,84,59)
+rgb(239,63,66)
+
+to match the site: 
+
+http://www.servicefusion.com/
+
+To change the navbar colors, etc, you need to download/install Bootstrap locally, then get into the boostrap.css file and look for .navbar-default .navbar-brand{ color.... }
+
+http://stackoverflow.com/questions/18534390/bootstrap-3-navbar-branding-colour
+-->
+
+{% endblock %}
+

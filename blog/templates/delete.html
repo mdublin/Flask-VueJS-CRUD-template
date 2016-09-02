@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+
+
+
+{% block content %}
+
+
+<h1>
+    <font color="428bca">Are you sure you want to delete this post?</font>
+</h1>
+
+<div class="row">
+    <div class="col-md-2 text-right metadata">
+        <!-- id=dbentry.id is how we get the id of the current entry into the url of the editentry page, which is passed to the editentry(id=1) decorator, which in turns passes id to the editentry() function to redner the current entry with its content on the editentry page-->
+        <ul class="list-unstyled">
+            <!-- using dateformat() filter from filters.py on entry.datetime -->
+            <!--  object that's passed to filter | filter (or filter can be filter("some string") so that both object and string are passed to filter function -->
+            <li>
+            </li>
+        </ul>
+    </div>
+    <div class="col-md-10">
+        <h1>
+            {{ dbentry.title }}
+            <!-- using markdown() filter from filters.py on content supplied by entry.content -->
+        </h1>
+        {{ dbentry.content | markdown }}
+    </div>
+<form role="form" method="POST">
+    <input type="hidden" id="content" name="content" value={{ dbentry.id }}>
+     <button type="submit" class="btn btn-default"><font color="428bca">DELETE</font></button>
+</form>
+<!-- the DELETE POST request is using delete_entry() function in views.py -->
+</div>
+
+{% endblock %}
+

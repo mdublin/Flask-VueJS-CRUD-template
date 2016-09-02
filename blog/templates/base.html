@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+            
+        <title>CRUD demo</title>
+            
+        <!-- CSS -->
+        <!-- Using Bootstrap to provide some basic styling and UI components -->
+		<!-- <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"> -->
+		<link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+        <!-- Blog -->
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.mycustom.css') }}">
+
+		<!--  <link rel="stylesheet" href="{{ url_for('static', filename='css/cover.css') }}"> -->
+
+        <!-- JavaScript -->
+        <!-- jQuery -->
+		<script src="http://code.jquery.com/jquery-2.1.1.min.js"></script>
+		<!--vue.js-->
+		<!--<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/1.0.26/vue.common.js"></script>-->
+        <!-- Bootstrap -->
+		<!-- <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script> -->
+
+		<link rel="stylesheet" href="{{ url_for('static', filename='js/bootstrap.min.js') }}"> 
+    </head>
+    
+    <body>
+        <div class="navbar navbar-inverse navbar-static-top" role="navigation">
+            <div class="container">
+                <div class="navbar-header">
+                    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+					<a class="navbar-brand" href="{{ url_for('addperson') }}">Add Person</a>
+					<a class="navbar-brand" href="{{ url_for('viewpeople') }}">View People</a>
+                </div>
+                <div class="collapse navbar-collapse">
+                    <ul class="nav navbar-nav navbar-right">
+
+                </div>
+                <div class="collapse navbar-collapse">
+                    <ul class="nav navbar-nav navbar-right">
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <!-- calling the get_flashed_messages function, telling it to also give categories with the messages. The categories allow us to classify the severity of messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        {% for category, message in messages %}
+        <div class="alert alert-{{ category }}">
+            {{ message }}
+        </div>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+        
+        <!-- block tags allow this parent template to receive content from entries.html, the child template. The block tags are like placeholders to be filled in by code from the child template(s). -->
+        <div class="container">
+            {% block content %}{% endblock %}
+        </div>
+    </body>
+</html>
+
