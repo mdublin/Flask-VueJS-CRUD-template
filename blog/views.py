@@ -36,10 +36,11 @@ def addperson():
         count = 0
         for person in session.query(Person).all():
             print person.__dict__
-            count += 1
             db_dict = person.__dict__
             del db_dict['_sa_instance_state']
             display_entries[count] = db_dict
+            count += 1
+
          
         return(jsonify(display_entries))    
         #return ("<h1>POST OKAY</h1>")
@@ -88,6 +89,38 @@ def viewpeople(page=1):
     people = session.query(Person)
     search_results = people.filter_by(firstname = search_query).first()
     
+    print request.method
+
+    if request.method == "POST":
+        if "delete_id" in request.form:
+            print("inside if")
+            print(request.form)
+            print(request.get_data())
+            person_to_delete = request.form["delete_id"]
+            delete_person_by_id = session.query(Person).filter_by(id=person_to_delete).delete()
+            session.commit()
+            return ("Person deleted")
+        
+        else:
+            print(request.form)
+            print(request.get_data())
+            
+            id = request.form["db_id"]
+            
+            if request.form["firstname"] != '':
+                update_dbentry = session.query(Person).filter_by(id=id).update({"firstname": "%s" % (request.form["firstname"])})
+            if request.form["lastname"] != '':
+                update_dbentry = session.query(Person).filter_by(id=id).update({"lastname": "%s" %(request.form["lastname"])})
+            if request.form["DOB"] != '':
+                update_dbentry = session.query(Person).filter_by(id=id).update({"dob": "%s" %(request.form["DOB"])})
+            if request.form["zipcode"] != '':
+                update_dbentry = session.query(Person).filter_by(id=id).update({"zipcode": "%s" %(request.form["zipcode"])})
+            
+            session.commit()
+            return ("entry updated")
+
+
+
     if search_query is None:
         return render_template("viewpeople.html")
 
