@@ -18,9 +18,7 @@ session = Session()
 import datetime
 from sqlalchemy import Column, Integer, String, Text, DateTime
 from .database import Base, engine
-from sqlalchemy import Column, Integer, String, Text, DateTime
 
-from .database import Base, engine
 
 class Person(Base):
     __tablename__ = "Persons"

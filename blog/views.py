@@ -3,10 +3,20 @@ from flask import render_template, jsonify
 
 from blog import app
 from .database import session, Person
+from sqlalchemy import select, or_, and_
 
-PAGINATE_BY = 10 # PAGINATE_BY is a module constant that indicates how many should be on each page
+import re
+
+
+from query_handler import query_handler
+
+
+# PAGINATE_BY is a module constant that indicates how many should be on
+# each page
+PAGINATE_BY = 10
 
 from flask.ext.login import login_required
+
 
 @app.route("/")
 def index():
@@ -15,6 +25,7 @@ def index():
 
 from flask import request, redirect, url_for
 from flask.ext.login import current_user
+
 
 @app.route("/addperson/", methods=["GET", "POST"])
 def addperson():
@@ -32,7 +43,8 @@ def addperson():
         session.add(people)
         session.commit()
         display_entries = {}
-        # count is just acting as a key for the value, which is every person dict row entry representation
+        # count is just acting as a key for the value, which is every person
+        # dict row entry representation
         count = 0
         for person in session.query(Person).all():
             print person.__dict__
@@ -41,17 +53,13 @@ def addperson():
             display_entries[count] = db_dict
             count += 1
 
-         
-        return(jsonify(display_entries))    
-        #return ("<h1>POST OKAY</h1>")
-        #return redirect(url_for("people"))
+        return(jsonify(display_entries))
+        # return ("<h1>POST OKAY</h1>")
+        # return redirect(url_for("people"))
     return render_template("addperson.html")
 
 
-
-
-
-# API GET endpoint for people listing 
+# API GET endpoint for people listing
 @app.route("/listpeople/")
 def getperson():
     display_entries = {}
@@ -65,85 +73,145 @@ def getperson():
     return(jsonify(display_entries))
 
 
-'''
-@app.route("/addperson/", methods=["POST"])
-def addperson_post():
-    people = session.query(Person)
-    people = Person(
-        firstname=request.form["firstname"],
-        lastname=request.form["lastname"],
-        dob=request.form["DOB"],
-        zipcode=request.form["zipcode"]
-    )
-    session.add(people)
-    session.commit()
-    return redirect(url_for("people"))
-'''
-
-
-
 @app.route("/viewpeople", methods=["GET", "POST"])
 @app.route("/viewpeople/page/<int:page>")
 def viewpeople(page=1):
     search_query = request.args.get('search_for')
-    people = session.query(Person)
-    search_results = people.filter_by(firstname = search_query).first()
-    
-    print request.method
 
+    # search_query is a unicode as Flask, Jinja2 are all Unicode based
+
+    print(type(search_query))
+
+    print(request.url)
+    print(search_query)
+
+    people = session.query(Person)
+    #search_results = people.filter_by(firstname = search_query).first()
+
+    print(request.method)
+
+    # UPDATES
     if request.method == "POST":
         if "delete_id" in request.form:
             print("inside if")
             print(request.form)
             print(request.get_data())
             person_to_delete = request.form["delete_id"]
-            delete_person_by_id = session.query(Person).filter_by(id=person_to_delete).delete()
+            delete_person_by_id = session.query(
+                Person).filter_by(id=person_to_delete).delete()
             session.commit()
             return ("Person deleted")
-        
+
         else:
             print(request.form)
             print(request.get_data())
-            
+
             id = request.form["db_id"]
-            
+
             if request.form["firstname"] != '':
-                update_dbentry = session.query(Person).filter_by(id=id).update({"firstname": "%s" % (request.form["firstname"])})
+                update_dbentry = session.query(Person).filter_by(id=id).update(
+                    {"firstname": "%s" % (request.form["firstname"])})
             if request.form["lastname"] != '':
-                update_dbentry = session.query(Person).filter_by(id=id).update({"lastname": "%s" %(request.form["lastname"])})
+                update_dbentry = session.query(Person).filter_by(id=id).update(
+                    {"lastname": "%s" % (request.form["lastname"])})
             if request.form["DOB"] != '':
-                update_dbentry = session.query(Person).filter_by(id=id).update({"dob": "%s" %(request.form["DOB"])})
+                update_dbentry = session.query(Person).filter_by(
+                    id=id).update({"dob": "%s" % (request.form["DOB"])})
             if request.form["zipcode"] != '':
-                update_dbentry = session.query(Person).filter_by(id=id).update({"zipcode": "%s" %(request.form["zipcode"])})
-            
+                update_dbentry = session.query(Person).filter_by(id=id).update(
+                    {"zipcode": "%s" % (request.form["zipcode"])})
+
             session.commit()
-            return ("entry updated")
-
-
+            # return (request.url)
+            # return ("entry updated")
 
     if search_query is None:
         return render_template("viewpeople.html")
 
     else:
-        search_results = people.filter_by(firstname = search_query).first()
+
         
+        print("calling query_handler....")
+        call_query_handler = query_handler(search_query)
+
+        print(call_query_handler)
+
+        '''
+        # executes query with limit 1 and returns the result row as a tuple or None if no rows returned
+        search_results = people.filter_by(firstname = search_query).first() or people.filter_by(lastname = search_query).first() or people.filter_by(dob = search_query).first() or people.filter_by(zipcode = search_query).first()
+
+        #print("search_results...first(): {}".format(search_results.__dict__))
+
         if search_results is not None:
-            search_results = people.filter_by(firstname = search_query)
-            # getting results count, which will be used for pagination below
-            count = people.filter_by(firstname = search_query).count()
-            # Zero-indexed page
-            page_index = page - 1 #page_index is page number - 1 = 0 for zero-based index
-            #count = session.query(Person).count() #using count method of query object to determine number of enties in total
-            start = page_index * PAGINATE_BY # start = 0 X 10 = 0  index of first item displayed
-            end = start + PAGINATE_BY # end = 0 + 10 = 10  index of last item displayed
-            total_pages = (count - 1) / PAGINATE_BY + 1 # total number of pages of content
-            has_next = page_index < total_pages - 1 # this is a boolean statement --> if True, then there's a next page
-            has_prev = page_index > 0 # this is a boolean statement
-            people = people.order_by(Person.lastname) #order entries by datetime column
-            people = people[start:end] # slicing query to only return entries between start and end indices
-            print("STUFF: ")
-            print(people, has_next, has_prev, page, total_pages)
-            return render_template("viewpeople.html",
+
+            print("search_query: {}".format(search_query))
+
+            # If True search_query is either a DOB or zipcode
+            if search_query.isnumeric() == True:
+                #check if search_query looks like a DOB format
+                search_query = str(search_query)
+
+                #regex is checking for DOB based on format of search_query, either dd/mm/yyyy or dd.mm.yyyy
+                try:
+                    regcheck = re.search(r'\d+/\d+/\d+', search_query) or re.search(r'\d+.\d+.d+', search_query)
+                    search_query = regcheck.group()
+                    print "a DOB was submitted {}".format(search_query)
+                    search_results = people.filter_by(dob = search_query)
+                    count = people.filter_by(dob = search_query).count()
+                    people = search_results
+                    #people = people.order_by(Person.lastname) #order entries by datetime column
+                except AttributeError as e:
+                    print(e)
+                    print"this was not a DOB"
+                    search_results = people.filter_by(zipcode = search_query)
+
+            # if True search_query is a unicode string (i.e. search_query is either a firstname or lastname)
+            if search_query.isalpha() == True:
+                search_results = people.filter(and_(Person.firstname == search_query, Person.lastname == search_query))
+                print(search_results)
+
+
+
+            #search_results = session.query(Person).filter(Person==search_query)
+            #print(search_results)
+
+            #find = people.filter(or_(
+            #        Person.firstname == search_query,
+            #        Person.lastname == search_query
+            #    )
+            #)
+
+            #search_results = people.filter_by(firstname = search_query).first() or people.filter_by(lastname = search_query).first() or people.filter_by(dob = search_query).first() or people.filter_by(zipcode = search_query).first()
+
+            #print search_results.__dict__
+
+            #count = 10
+        '''
+
+        #search_results = people.filter_by(firstname = search_query)
+        # getting results count, which will be used for pagination below
+        #count = people.filter_by(firstname = search_query).count()
+        # Zero-indexed page
+        page_index = page - 1  # page_index is page number - 1 = 0 for zero-based index
+        # count = session.query(Person).count() #using count method of
+        # query object to determine number of enties in total
+        # start = 0 X 10 = 0  index of first item displayed
+        start = page_index * PAGINATE_BY
+        end = start + PAGINATE_BY  # end = 0 + 10 = 10  index of last item displayed
+        # total number of pages of content
+        total_pages = (count - 1) / PAGINATE_BY + 1
+        # this is a boolean statement --> if True, then there's a next page
+        has_next = page_index < total_pages - 1
+        has_prev = page_index > 0  # this is a boolean statement
+
+        # people = people.order_by(Person.lastname) #order entries by
+        # datetime column
+        # slicing query to only return entries between start and end
+        # indices
+        people = people[start:end]
+        # print("STUFF: ")
+        # print(people, has_next, has_prev, page, total_pages)
+        return render_template("viewpeople.html",
                                    people=search_results,
                                    search_for=search_query,
                                    has_next=has_next,
@@ -151,10 +219,12 @@ def viewpeople(page=1):
                                    page=page,
                                    total_pages=total_pages
                                    )
-        else:
-            noresult = True
-            return render_template("viewpeople.html", noresult=noresult)
-    
+        #else:
+        #    noresult = True
+        #    return render_template("viewpeople.html", noresult=noresult)
+
+
+
     '''
     print("search_results: {}".format(dir(search_results)))
 
@@ -177,37 +247,38 @@ def viewpeople(page=1):
         search_submission = request.form["search_for_input"]
 
         #search_Person = people.filter_by( firstname = search_submission, lastname = search_submission, dob = search_submission, zipcode = search_submission )
-        
+
         # searching Person table entries by firstname column
         search_Person = people.filter_by( firstname = search_submission )
-        
+
 # iterating through returned search_Person results object, printing contents of objects via internal __dict__ of SQLAlchemyn object
         #for results in search_Person:
         #    print(results.__dict__)
         #
         print(search_Person)
 
-        return redirect(url_for("searchresults", search_Person=search_Person))          
+        return redirect(url_for("searchresults", search_Person=search_Person))
 
     '''
 
+
 @app.route('/searchresults/<string:search_Person>')
 def searchresults(search_Person):
-    #print(request.args.get('search_for_input'))
-    
+    # print(request.args.get('search_for_input'))
+
     print(search_Person)
 
-    #for results in search_Person:
+    # for results in search_Person:
     #    print(results.__dict__)
     #    print(results.__dict__["firstname"])
-    
+
     return render_template('searchresults.html')
+
 
 @app.route("/vuetest/")
 def vuetest():
-    message="shitty"
+    message = "shitty"
     return render_template('vuetest.html')
-
 
 
 '''
@@ -247,7 +318,7 @@ def editentry_post(id=1):
 
    # nice little SQLAlchemy query/filter/update statement to update existing post with new data
     update_dbentry = session.query(Entry).filter_by(id=id).update({"title": "%s" %(updated_title), "content": "%s" % (updated_content)})
-    
+
     entries = session.query(Entry)
     for entry in entries:
         if entry.id == id:
