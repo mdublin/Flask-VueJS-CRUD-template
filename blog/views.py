@@ -13,7 +13,7 @@ from query_handler import query_handler
 
 # PAGINATE_BY is a module constant that indicates how many should be on
 # each page
-PAGINATE_BY = 10
+PAGINATE_BY = 5
 
 from flask.ext.login import login_required
 
@@ -78,9 +78,12 @@ def getperson():
 def viewpeople(page=1):
     search_query = request.args.get('search_for')
 
-    # search_query is a unicode as Flask, Jinja2 are all Unicode based
+    # checking if unicode string is empty (i.e. someone just clicked search with an empty search field)
+    if len(search_query) == 0:
+        noresult = True
+        return render_template("viewpeople.html", noresult=noresult)
 
-    print(type(search_query))
+    # search_query is a unicode as Flask, Jinja2 are all Unicode based
 
     print(request.url)
     print(search_query)
@@ -134,66 +137,15 @@ def viewpeople(page=1):
         print("calling query_handler....")
         call_query_handler = query_handler(search_query)
 
-        print(call_query_handler)
+        #if no results found, call_query_handler returns True for noresults
+        if call_query_handler == True:
+            noresult = True
+            return render_template("viewpeople.html", noresult=noresult)
+ 
 
-        '''
-        # executes query with limit 1 and returns the result row as a tuple or None if no rows returned
-        search_results = people.filter_by(firstname = search_query).first() or people.filter_by(lastname = search_query).first() or people.filter_by(dob = search_query).first() or people.filter_by(zipcode = search_query).first()
-
-        #print("search_results...first(): {}".format(search_results.__dict__))
-
-        if search_results is not None:
-
-            print("search_query: {}".format(search_query))
-
-            # If True search_query is either a DOB or zipcode
-            if search_query.isnumeric() == True:
-                #check if search_query looks like a DOB format
-                search_query = str(search_query)
-
-                #regex is checking for DOB based on format of search_query, either dd/mm/yyyy or dd.mm.yyyy
-                try:
-                    regcheck = re.search(r'\d+/\d+/\d+', search_query) or re.search(r'\d+.\d+.d+', search_query)
-                    search_query = regcheck.group()
-                    print "a DOB was submitted {}".format(search_query)
-                    search_results = people.filter_by(dob = search_query)
-                    count = people.filter_by(dob = search_query).count()
-                    people = search_results
-                    #people = people.order_by(Person.lastname) #order entries by datetime column
-                except AttributeError as e:
-                    print(e)
-                    print"this was not a DOB"
-                    search_results = people.filter_by(zipcode = search_query)
-
-            # if True search_query is a unicode string (i.e. search_query is either a firstname or lastname)
-            if search_query.isalpha() == True:
-                search_results = people.filter(and_(Person.firstname == search_query, Person.lastname == search_query))
-                print(search_results)
-
-
-
-            #search_results = session.query(Person).filter(Person==search_query)
-            #print(search_results)
-
-            #find = people.filter(or_(
-            #        Person.firstname == search_query,
-            #        Person.lastname == search_query
-            #    )
-            #)
-
-            #search_results = people.filter_by(firstname = search_query).first() or people.filter_by(lastname = search_query).first() or people.filter_by(dob = search_query).first() or people.filter_by(zipcode = search_query).first()
-
-            #print search_results.__dict__
-
-            #count = 10
-        '''
-
-        #search_results = people.filter_by(firstname = search_query)
-        # getting results count, which will be used for pagination below
-        #count = people.filter_by(firstname = search_query).count()
+        search_results, count = call_query_handler
         # Zero-indexed page
         page_index = page - 1  # page_index is page number - 1 = 0 for zero-based index
-        # count = session.query(Person).count() #using count method of
         # query object to determine number of enties in total
         # start = 0 X 10 = 0  index of first item displayed
         start = page_index * PAGINATE_BY
@@ -204,13 +156,10 @@ def viewpeople(page=1):
         has_next = page_index < total_pages - 1
         has_prev = page_index > 0  # this is a boolean statement
 
-        # people = people.order_by(Person.lastname) #order entries by
-        # datetime column
+        search_results = search_results.order_by(Person.lastname) #order entries by
         # slicing query to only return entries between start and end
         # indices
-        people = people[start:end]
-        # print("STUFF: ")
-        # print(people, has_next, has_prev, page, total_pages)
+        search_results = search_results[start:end]
         return render_template("viewpeople.html",
                                    people=search_results,
                                    search_for=search_query,
@@ -219,12 +168,10 @@ def viewpeople(page=1):
                                    page=page,
                                    total_pages=total_pages
                                    )
-        #else:
-        #    noresult = True
-        #    return render_template("viewpeople.html", noresult=noresult)
 
 
-
+    
+    
     '''
     print("search_results: {}".format(dir(search_results)))
 
