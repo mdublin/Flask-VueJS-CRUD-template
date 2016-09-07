@@ -78,8 +78,11 @@ def getperson():
 def viewpeople(page=1):
     search_query = request.args.get('search_for')
     
-    print(request.form)
-    print(search_query)
+    # clean up any trailing white space
+    search_query = search_query.rstrip()
+    
+    #print(request.form)
+    #print(search_query)
 
     if search_query is None:
         return render_template("viewpeople.html")
@@ -90,8 +93,6 @@ def viewpeople(page=1):
         return render_template("viewpeople.html", noresult=noresult)
 
     # search_query is a unicode as Flask, Jinja2 are all Unicode based
-
-    print(request.url)
 
     people = session.query(Person)
     #search_results = people.filter_by(firstname = search_query).first()
@@ -171,46 +172,8 @@ def viewpeople(page=1):
                                    page=page,
                                    total_pages=total_pages
                                    )
-
-
+  
     
-    
-    '''
-    print("search_results: {}".format(dir(search_results)))
-
-    new = search_results.__iter__()
-    print(dir(new))
-    print(type(new))
-
-    boo = next(new)
-
-    print(type(boo))
-
-    for results in search_results:
-        print results
-
-
-    if request.method == "POST":
-        print("POST request made")
-        print(request.get_data())
-        print(request.form)
-        search_submission = request.form["search_for_input"]
-
-        #search_Person = people.filter_by( firstname = search_submission, lastname = search_submission, dob = search_submission, zipcode = search_submission )
-
-        # searching Person table entries by firstname column
-        search_Person = people.filter_by( firstname = search_submission )
-
-# iterating through returned search_Person results object, printing contents of objects via internal __dict__ of SQLAlchemyn object
-        #for results in search_Person:
-        #    print(results.__dict__)
-        #
-        print(search_Person)
-
-        return redirect(url_for("searchresults", search_Person=search_Person))
-
-    '''
-
 
 @app.route('/searchresults/<string:search_Person>')
 def searchresults(search_Person):
