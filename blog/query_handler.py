@@ -57,15 +57,9 @@ def query_handler(search_query):
     # last option could be zipcode in either 12345 format or 1212-2334 format, etc
     else:
         search_results = people.filter_by(zipcode=search_query)
-        count = people.filter_by(dob = search_query).count()
+        count = people.filter_by(zipcode = search_query).count()
         
         if count == 0:
             return (noresult)
         return (search_results, count)
-
-
-
-
-
-
 

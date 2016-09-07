@@ -77,16 +77,21 @@ def getperson():
 @app.route("/viewpeople/page/<int:page>")
 def viewpeople(page=1):
     search_query = request.args.get('search_for')
+    
+    print(request.form)
+    print(search_query)
+
+    if search_query is None:
+        return render_template("viewpeople.html")
 
     # checking if unicode string is empty (i.e. someone just clicked search with an empty search field)
-    if len(search_query) == 0:
+    if not search_query:
         noresult = True
         return render_template("viewpeople.html", noresult=noresult)
 
     # search_query is a unicode as Flask, Jinja2 are all Unicode based
 
     print(request.url)
-    print(search_query)
 
     people = session.query(Person)
     #search_results = people.filter_by(firstname = search_query).first()
@@ -131,9 +136,7 @@ def viewpeople(page=1):
     if search_query is None:
         return render_template("viewpeople.html")
 
-    else:
-
-        
+    else: 
         print("calling query_handler....")
         call_query_handler = query_handler(search_query)
 
