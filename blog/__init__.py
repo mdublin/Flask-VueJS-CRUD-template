@@ -5,6 +5,10 @@ import os
 
 from flask import Flask
 
+# for csrf protection
+from flask_wtf.csrf import CsrfProtect
+
+
 # for vue.js
 class CustomFlask(Flask):
     jinja_options = Flask.jinja_options.copy()
@@ -20,10 +24,13 @@ class CustomFlask(Flask):
 
 #app = CustomFlask(__name__)
 
+csrf = CsrfProtect()
+
 # end for vue.js
 
 # this is original app object
 app = Flask(__name__)
+csrf.init_app(app)
 
 # blog.config.DevelopmentConfig is calling to the DevelopmentConfig() class in config.py, a class that contains the SQLAlchemy db URI, etc
 

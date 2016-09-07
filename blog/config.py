@@ -9,7 +9,8 @@ class DevelopmentConfig(object):
     SQLALCHEMY_DATABASE_URI = "postgresql://mdublin1@localhost:5432/CRUD"
     DEBUG = True
     # setting up secret key for Flask-login module
-    SECRET_KEY = os.environ.get("BLOGFUL_SECRET_KEY", "")
+    WTF_CSRF_ENABLED = True
+    SECRET_KEY = os.environ.get("CRUD_SECRET_KEY", "")
     print SECRET_KEY
 
 
