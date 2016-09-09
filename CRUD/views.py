@@ -1,7 +1,7 @@
 
 from flask import render_template, jsonify
 
-from blog import app
+from CRUD import app
 from .database import session, Person
 from sqlalchemy import select, or_, and_
 
@@ -78,9 +78,6 @@ def getperson():
 def viewpeople(page=1):
     search_query = request.args.get('search_for')
     
-    # clean up any trailing white space
-    search_query = search_query.rstrip()
-    
     #print(request.form)
     #print(search_query)
 
@@ -91,6 +88,9 @@ def viewpeople(page=1):
     if not search_query:
         noresult = True
         return render_template("viewpeople.html", noresult=noresult)
+    # cleaning up any possible trailing white space    
+    if search_query is not None:
+        search_query = search_query.rstrip()
 
     # search_query is a unicode as Flask, Jinja2 are all Unicode based
 
@@ -109,7 +109,8 @@ def viewpeople(page=1):
             delete_person_by_id = session.query(
                 Person).filter_by(id=person_to_delete).delete()
             session.commit()
-            return ("Person deleted")
+            deleteconfirmation = True
+            return render_template("viewpeople.html", deleteconfirmation=deleteconfirmation)
 
         else:
             print(request.form)

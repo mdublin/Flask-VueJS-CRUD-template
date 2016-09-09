@@ -120,9 +120,9 @@
 {% elif noresult %}
     <h1>Sorry, we couldn't find that person. Please try to search for another person...</h1>
 
+{%  elif deleteconfirmation %}
+    <h1> Entry deleted from database. </h1>
 {% endif %}
-    
-
 
 <!-- entries object is returned/rendered to this file by entries() in view.py -->
 <!-- entries object is a SQLALchemy session query that's querying entry objects (its type is actually a class). It contains all of our database entries in our Entry table and is iterated through with the for loop below and passed as an argument to the macros.render_entry() function (rendering each one with the render_entry macro) -->

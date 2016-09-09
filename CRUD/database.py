@@ -6,7 +6,7 @@ from sqlalchemy import ForeignKey
 from sqlalchemy.orm import relationship
 
 # import the app Flask object from the blog package, courtesy of __init__.py
-from blog import app
+from CRUD import app
 
 # engine object is created to as an object that talks to the db at the db URI specified in config.py
 

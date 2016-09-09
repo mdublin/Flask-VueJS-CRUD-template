@@ -7,7 +7,7 @@ from flask.ext.script import Manager
 # Instead of using argparse to pass commands to our blog app package, we are using a module called Flask-Script.
 # Flask-Script allows you to specify tasks to help manage your application.
 
-from blog import app
+from CRUD import app
 manager = Manager(app)
 
 
@@ -20,7 +20,7 @@ def run():
     app.run(host='0.0.0.0', port=port)
 
 # importing the database.py module from the blog package you created
-from blog.database import session, Person
+from CRUD.database import session, Person
 
 
 # populating the db with dummy content
@@ -45,7 +45,7 @@ def seed():
 # $ python manage.py seedi
 
 from flask.ext.migrate import Migrate, MigrateCommand
-from blog.database import Base
+from CRUD.database import Base
 
 # create a new class for holding metadata object which Alembic uses to
 # work out what changes to db schema need to happen.
