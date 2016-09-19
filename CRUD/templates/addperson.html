@@ -6,14 +6,11 @@
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/1000hz-bootstrap-validator/0.11.5/validator.js"></script>
 
 
-<h1>
-    Add Person
-</h1>
-
-<div class="container" id="app">
+<div class="container_align" id="app">
 
 <!-- form fields are using HTML5 regex validation via pattern="some HTML5 regex", with error messages called in via Bootstrap Validator via data-toggle="validator"-->
-<form action="" method="POST" role="form" data-toggle="validator" class="form-horizontal">
+
+<form action="" method="POST" role="form" data-toggle="validator" class="form-horizontal" id="addpersonForm" name="addpersonForm">
 	<input type="hidden" name="csrf_token" value="{{ csrf_token() }}" /> 
 	<div class="form-group">
       <label class="control-label col-sm-2" for="firstname">First Name:</label>
@@ -101,11 +98,12 @@
 
 </form>
 
+</div>
 
 
 </div>
 
-</div>
+<div class="container" id="success"></div>
 
 
 <script>
@@ -175,6 +173,61 @@
 		}
 
 	});
+
+
+
+	// Ajax form data sender
+    function sendData(form) {
+
+    	var XHR = new XMLHttpRequest();
+
+    	// We bind the FormData object and the form element
+    	var FD  = new FormData(form);
+
+    	// We define what will happen if the data are successfully sent
+    	XHR.addEventListener("load", function(event) {
+			console.log(event.target.responseText);
+			//location.href = "http://0.0.0.0:8080/addperson/";
+		    $("#app").hide();
+			//$("#success").append("<h1>person has been added</h1>");
+			$("#success").load('http://0.0.0.0:8080/successconfirm/');
+    	});
+
+    	// We define what will happen in case of error
+    	XHR.addEventListener("error", function(event) {
+			console.log('Something went wrong');
+			console.log(xhr.status);
+    	});
+
+    	// We setup our request
+    	XHR.open("POST", "http://0.0.0.0:8080/addperson/");
+
+    	// The data sent are the one the user provide in the form
+	    XHR.send(FD);
+
+
+ 	 };
+
+
+    // JQuery Bootstrap validator that's controlling sendData() 
+	$('#addpersonForm').validator().on('submit', function (e, data) {
+		if (e.isDefaultPrevented()) {
+            console.log(data);
+			console.log(e);
+			// handle the invalid form...
+			console.log("invalid form");
+  		} else {
+			// everything looks good!
+		    var form = document.getElementById("addpersonForm");
+		    // to takeover its submit event.
+    		//event.preventDefault();
+			sendData(form);
+			event.preventDefault();
+  			};
+
+  		});
+
+
 
 
 

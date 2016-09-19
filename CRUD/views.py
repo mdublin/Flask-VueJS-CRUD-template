@@ -53,10 +53,15 @@ def addperson():
             display_entries[count] = db_dict
             count += 1
 
-        return(jsonify(display_entries))
+        # return(jsonify(display_entries))
         # return ("<h1>POST OKAY</h1>")
         # return redirect(url_for("people"))
     return render_template("addperson.html")
+
+
+@app.route("/successconfirm/")
+def success_confirm():
+    return render_template("successconfirm.html")
 
 
 # API GET endpoint for people listing
@@ -73,22 +78,23 @@ def getperson():
     return(jsonify(display_entries))
 
 
-@app.route("/viewpeople", methods=["GET", "POST"])
-@app.route("/viewpeople/page/<int:page>")
-def viewpeople(page=1):
+@app.route("/searchpeople", methods=["GET", "POST"])
+@app.route("/searchpeople/page/<int:page>")
+def searchpeople(page=1):
     search_query = request.args.get('search_for')
-    
-    #print(request.form)
-    #print(search_query)
+
+    # print(request.form)
+    # print(search_query)
 
     if search_query is None:
-        return render_template("viewpeople.html")
+        return render_template("searchpeople.html")
 
-    # checking if unicode string is empty (i.e. someone just clicked search with an empty search field)
+    # checking if unicode string is empty (i.e. someone just clicked search
+    # with an empty search field)
     if not search_query:
         noresult = True
-        return render_template("viewpeople.html", noresult=noresult)
-    # cleaning up any possible trailing white space    
+        return render_template("searchpeople.html", noresult=noresult)
+    # cleaning up any possible trailing white space
     if search_query is not None:
         search_query = search_query.rstrip()
 
@@ -99,7 +105,7 @@ def viewpeople(page=1):
 
     print(request.method)
 
-    # UPDATES
+    # DELETE request handler
     if request.method == "POST":
         if "delete_id" in request.form:
             print("inside if")
@@ -110,7 +116,9 @@ def viewpeople(page=1):
                 Person).filter_by(id=person_to_delete).delete()
             session.commit()
             deleteconfirmation = True
-            return render_template("viewpeople.html", deleteconfirmation=deleteconfirmation)
+            return render_template(
+                "searchpeople.html",
+                deleteconfirmation=deleteconfirmation)
 
         else:
             print(request.form)
@@ -136,19 +144,19 @@ def viewpeople(page=1):
             # return ("entry updated")
 
     if search_query is None:
-        return render_template("viewpeople.html")
+        return render_template("searchpeople.html")
 
-    else: 
+    else:
         print("calling query_handler....")
         call_query_handler = query_handler(search_query)
 
-        #if no results found, call_query_handler returns True for noresults
-        if call_query_handler == True:
+        # if no results found, call_query_handler returns True for noresults
+        if call_query_handler == None:
             noresult = True
-            return render_template("viewpeople.html", noresult=noresult)
- 
+            return render_template("searchpeople.html", noresult=noresult)
 
         search_results, count = call_query_handler
+
         # Zero-indexed page
         page_index = page - 1  # page_index is page number - 1 = 0 for zero-based index
         # query object to determine number of enties in total
@@ -161,20 +169,20 @@ def viewpeople(page=1):
         has_next = page_index < total_pages - 1
         has_prev = page_index > 0  # this is a boolean statement
 
-        search_results = search_results.order_by(Person.lastname) #order entries by
+        search_results = search_results.order_by(
+            Person.lastname)  # order entries by
         # slicing query to only return entries between start and end
         # indices
         search_results = search_results[start:end]
-        return render_template("viewpeople.html",
-                                   people=search_results,
-                                   search_for=search_query,
-                                   has_next=has_next,
-                                   has_prev=has_prev,
-                                   page=page,
-                                   total_pages=total_pages
-                                   )
-  
-    
+        return render_template("searchpeople.html",
+                               people=search_results,
+                               search_for=search_query,
+                               has_next=has_next,
+                               has_prev=has_prev,
+                               page=page,
+                               total_pages=total_pages
+                               )
+
 
 @app.route('/searchresults/<string:search_Person>')
 def searchresults(search_Person):
@@ -189,98 +197,15 @@ def searchresults(search_Person):
     return render_template('searchresults.html')
 
 
+@app.route("/viewpeople/")
+def viewpeople():
+    '''
+    view all people in db
+    '''
+    return render_template('viewpeople.html')
+
+
 @app.route("/vuetest/")
 def vuetest():
-    message = "shitty"
+    message = "testestestest"
     return render_template('vuetest.html')
-
-
-'''
-
-# edit entry option from single entry display page
-@app.route("/editentry/<int:id>", methods=["GET"]) #we don't necessarily need to have GET here, but adding to be uniform with add_entry function above
-@login_required
-def editentry(id=1):
-    entries = session.query(Entry)
-    for entry in entries:
-        if entry.id == id:
-            dbentry = entry
-            entry.content
-            author = entry.author_id
-        else:
-            pass
-
-    # post edit entry changes with current user control logic below for allowing/prohbiting access to EDIT and DELETE buttons.
-    # not using these lines because there is a jinja2 conditional statement builtin the entry.html template that checks if current_user == the author of the post.
-    #currentUser = current_user.id #using current_user object to find current user courtesy of Flask-login
-    #if author != currentUser:
-    #    return render_template("edit_access_error.html")
-    #else:
-    #    return render_template("editentry.html", dbentry=dbentry, current_user=current_user, author=author)
-#        else:
-#            pass
-    return render_template("editentry.html", dbentry=dbentry)
-
-
-# post edit entry changes
-@app.route("/editentry/<int:id>", methods=["POST"])
-@login_required
-def editentry_post(id=1):
-    # using Flask's request.form dictionary to access the data submitted with your form and assign it to the correct fields in the entry.
-    updated_title=request.form["title"]
-    updated_content=request.form["content"]
-
-   # nice little SQLAlchemy query/filter/update statement to update existing post with new data
-    update_dbentry = session.query(Entry).filter_by(id=id).update({"title": "%s" %(updated_title), "content": "%s" % (updated_content)})
-
-    entries = session.query(Entry)
-    for entry in entries:
-        if entry.id == id:
-            dbentry = entry
-            entry.content
-        else:
-            pass
-    # rendering entry.html with updated content
-    return render_template("entry.html", dbentry=dbentry)
-
-
-
-
-# confirm delete entry
-@app.route("/delete/<int:id>")
-@login_required
-def delete(id=1):
-    #entry_to_delete = request.form["value"]
-    #print entry_to_delete
-    entries = session.query(Entry)
-    for entry in entries:
-        if entry.id == id:
-            dbentry = entry
-            entry.content
-        else:
-            pass
-    return render_template("delete.html", dbentry=dbentry)
-
-
-# delete entry
-@app.route("/delete/<int:id>", methods=['POST'])
-@login_required
-def delete_entry(id=1):
-    entry_to_delete = request.form["content"]
-    print entry_to_delete
-    #entries = session.query(Entry)
-    delete_entry_by_id = session.query(Entry).filter_by(id=entry_to_delete).delete()
-        #    for entry in entries:
-        #if entry.id == id:
-        #    dbentry = entry
-        #    entry.content
-        #else:
-        #    pass
-    return redirect(url_for("deleted_confirmation"))
-
-
-@app.route("/deleted")
-def deleted_confirmation():
-    return render_template("deleted_confirmation.html")
-
-'''

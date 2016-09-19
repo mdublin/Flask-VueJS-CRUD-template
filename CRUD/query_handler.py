@@ -41,14 +41,11 @@ def query_handler(search_query):
 
         count = session.query(Person).filter(or_(Person.firstname.like(search_query), Person.lastname.like(search_query))).count()
 
-        print(search_results)
-        
-        print("before for loop")
+
         for results in search_results:
-            print("inside")
             print results.__dict__
 
-        if count == 0: 
+        if count == 0:
             return (noresult)
         else:
             return (search_results, count)
