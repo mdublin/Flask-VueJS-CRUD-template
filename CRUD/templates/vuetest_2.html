@@ -1,0 +1,125 @@
+
+<!-- importing macros.html as macros which is a macro used for handling each entry in the blogful db -->
+{% import "CRUD_macros.html" as macros %}
+
+<!-- The extends informs the templating engine that this template “extends” another template, base.html, establishing a link between the templates. This sends what the code below does over to base.html -->
+{% extends "base.html" %}
+
+
+{% block content %}
+
+<script type="text/javascript" src="https://npmcdn.com/vue@1.0.26/dist/vue.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+<!--
+<ul id="test">
+  <template v-for="item in items" track-by="$index">
+	  <li>${ item.firstname }</li>
+    <li class="divider"></li>
+  </template>
+</ul>
+
+-->
+
+<div class="list-group" id="test">
+	<template v-for="item in items" track-by="$index">
+      <a href="#" class="list-group-item active">
+	  <b>Name:</b> ${ item.firstname} ${ item.lastname }</a>
+      <a href="#" class="list-group-item"><b>DOB:</b> ${ item.dob }</a>
+	  <a href="#" class="list-group-item"><b>postal code:</b> ${ item.zipcode }</a>
+      <a class="list-group-item"><button type="button" class="btn btn-danger" data-toggle="modal" data-target="#DeleteModal">DELETE</button>   <button type="button" class="btn btn-info" data-toggle="modal" data-target="#UpdateModal">UPDATE</button></a>
+  </template>
+  </div>
+
+
+
+<script>
+
+	
+	Vue.config.delimiters = ["${", "}"];
+
+
+	function testCallback() {
+		console.log("this is the callback function");
+	}
+
+
+
+    var xhr = new XMLHttpRequest();
+    //xhr.addEventListener("load", reqListener);
+	xhr.onreadystatechange = function() {
+		if(xhr.readyState == XMLHttpRequest.DONE){
+			alert(xhr.responseText);
+			//console.log(xhr.response);
+		
+		    testCallback;
+		
+		    //apiResponse = xhr.responseText;
+
+		    apiResponse = xhr.response;
+			// converting json server response string to json object
+			apiResponse = JSON.parse(apiResponse);
+
+			//console.log(apiResponse);
+			
+		    itemsArray = [];
+     
+			for(var i = 0; i < apiResponse.length; i++){
+				console.log(apiResponse[i]);
+			}
+
+
+
+			for (var entry in apiResponse){
+				console.log(apiResponse[entry]);
+				itemsArray.push(apiResponse[entry]);
+			}
+			
+			console.log("itemsArray: ");
+			console.log(itemsArray);
+			
+				
+			// vue.js	
+			var vm = new Vue({
+				el: '#test',
+				data: {
+					parentMessage: 'Parent',
+					items: itemsArray
+					//items: [
+					//	{ message: 'Foo' },
+					//	{ message: 'Bar' }
+					//]
+				}
+			})
+
+			
+		}
+	}
+	
+	xhr.open("GET", "http://0.0.0.0:8080/listpeople");
+	xhr.send();
+
+
+
+
+
+/*	
+	// vue.js
+	Vue.config.delimiters = ["${", "}"];
+	var vm = new Vue({
+		el: '#test',
+		data: {
+    parentMessage: 'Parent',
+    items: [
+      { message: 'Foo' },
+      { message: 'Bar' }
+    ]
+  }
+	})
+*/
+</script>
+
+
+{% endblock %}
+
