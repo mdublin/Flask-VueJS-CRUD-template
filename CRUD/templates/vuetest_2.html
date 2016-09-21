@@ -32,28 +32,72 @@
   </template>
   </div>
 
+  <!-- original jinja2 version
+<ul class="pager">
+        {% if has_prev %}
+        <li class="previous" >
+        <a href="{{ url_for('searchpeople', search_for=search_for, page=page - 1) }}">&larr;previous</a>
+        </li>
+        {% endif %}
+        {% if has_next %}
+        <li class="next">
+        <a href="{{ url_for('searchpeople', search_for=search_for, page=page + 1) }}">&rarr;next</a>
+        </li>
+        {% endif %}
+    </ul>
+
+	-->
+
+
+	<ul class="pager">
+		<li class="previous">
+			<a href="javascript:prevPage()" id="btn_prev">Previous</a>
+		</li>
+		<li class="next">
+			<a href="javascript:nextPage()" id="btn_next">Next</a>
+		</li>
+	</ul>
 
 
 <script>
+
+	var current_page = 1;
+	var records_per_page = 5;
+
+
+	function numPages() {
+		return Math.ceil(apiResponse.length / records_per_page);
+    }
+
+	function prevPage()
+		{
+    		if (current_page > 1) {
+        		current_page--;
+        		changePage(current_page);
+    		}
+		}
+		
+	function nextPage()
+		{
+    		if (current_page < numPages()) {
+        		current_page++;
+				changePage(current_page);
+				console.log(itemsArray.slice[10]);
+    	}
+	}
+
+
 
 	
 	Vue.config.delimiters = ["${", "}"];
 
 
-	function testCallback() {
-		console.log("this is the callback function");
-	}
-
-
-
     var xhr = new XMLHttpRequest();
     //xhr.addEventListener("load", reqListener);
 	xhr.onreadystatechange = function() {
-		if(xhr.readyState == XMLHttpRequest.DONE){
-			alert(xhr.responseText);
+		if(xhr.readyState == XMLHttpRequest.DONE) {
+			//alert(xhr.responseText);
 			//console.log(xhr.response);
-		
-		    testCallback;
 		
 		    //apiResponse = xhr.responseText;
 
@@ -71,13 +115,11 @@
 
 
 
-			for (var entry in apiResponse){
+			for (var entry in apiResponse) {
 				console.log(apiResponse[entry]);
 				itemsArray.push(apiResponse[entry]);
 			}
-			
-			console.log("itemsArray: ");
-			console.log(itemsArray);
+
 			
 				
 			// vue.js	
@@ -98,7 +140,7 @@
 	}
 	
 	xhr.open("GET", "http://0.0.0.0:8080/listpeople");
-	xhr.send();
+	xhr.send(current_page);
 
 
 

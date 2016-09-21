@@ -7,7 +7,7 @@ people = session.query(Person)
 def query_handler(search_query):
 
     # passed back to viewpeople view if no results are returned from search 
-    noresult = True
+    #noresult = True
 
     people = session.query(Person)
     print("query_handler called")
@@ -46,7 +46,7 @@ def query_handler(search_query):
             print results.__dict__
 
         if count == 0:
-            return (noresult)
+            return None
         else:
             return (search_results, count)
 
@@ -57,6 +57,6 @@ def query_handler(search_query):
         count = people.filter_by(zipcode = search_query).count()
         
         if count == 0:
-            return (noresult)
+            return None
         return (search_results, count)
 
