@@ -1,7 +1,97 @@
+<!-- importing macros.html as macros which is a macro used for handling each entry in the blogful db -->
+{% import "CRUD_macros.html" as macros %}
+
+<!-- The extends informs the templating engine that this template “extends” another template, base.html, establishing a link between the templates. This sends what the code below does over to base.html -->
+{% extends "base.html" %}
+
+
+{% block content %}
+
+<script type="text/javascript" src="https://npmcdn.com/vue@1.0.26/dist/vue.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+<!--
+<ul id="test">
+  <template v-for="item in items" track-by="$index">
+	  <li>${ item.firstname }</li>
+    <li class="divider"></li>
+  </template>
+</ul>
+
+-->
+
+<div class="list-group" id="test">
+	<template v-for="item in items" track-by="$index">
+      <a href="#" class="list-group-item active">
+	  <b>Name:</b> ${ item.firstname} ${ item.lastname }</a>
+      <a href="#" class="list-group-item"><b>DOB:</b> ${ item.dob }</a>
+	  <a href="#" class="list-group-item"><b>postal code:</b> ${ item.zipcode }</a>
+	  <a class="list-group-item"><button type="button" class="btn btn-danger" data-toggle="modal" data-target="#DeleteModal">DELETE</button>   <button type="button" class="btn btn-info" data-toggle="modal" data-target="#UpdateModal">UPDATE</button></a>
+	  <br></br>
+  </template>
+  </div>
+
+  <!-- original jinja2 version
+<ul class="pager">
+        {% if has_prev %}
+        <li class="previous" >
+        <a href="{{ url_for('searchpeople', search_for=search_for, page=page - 1) }}">&larr;previous</a>
+        </li>
+        {% endif %}
+        {% if has_next %}
+        <li class="next">
+        <a href="{{ url_for('searchpeople', search_for=search_for, page=page + 1) }}">&rarr;next</a>
+        </li>
+        {% endif %}
+    </ul>
+
+	-->
+
+
+	<ul class="pager">
+		<li class="previous" id="previous">
+			<a href="javascript:prevPage()" id="btn_prev">Previous</a>
+		</li>
+		<li class="next" id="next">
+			<a href="javascript:nextPage()" id="btn_next">Next</a>
+		</li>
+	</ul>
+
+
+
+
+
+
+
 <script>
 
+var itemsArray = [];
 
-function queryCall(page) {
+Vue.config.delimiters = ["${", "}"];
+
+var vm = new Vue({
+			el: '#test',
+			data: {
+				parentMessage: 'Parent',
+				items: itemsArray
+				//items: [
+				//	{ message: 'Foo' },
+				//	{ message: 'Bar' }
+				//]
+			}
+		})
+	
+
+function updateVueInstance(itemsArray) {
+
+		vm.items = itemsArray;
+		vm.$log();
+}
+
+
+
+function queryCall(currentPage) {
     var xhr = new XMLHttpRequest();
     xhr.onreadystatechange = function() {
 		console.log("calling function");
@@ -27,9 +117,14 @@ function queryCall(page) {
 			}
 
 			for (var entry in apiResponse) {
+				console.log("Adding to itemsArray...")
 				console.log(apiResponse[entry]);
 				itemsArray.push(apiResponse[entry]);
 			}
+  
+
+			console.log(itemsArray);
+			updateVueInstance(itemsArray);
 
 			// vue.js
 			/*var vm = new Vue({
@@ -42,23 +137,47 @@ function queryCall(page) {
 					//	{ message: 'Bar' }
 					//]
 				}
-			})*/
+			}) */
 
 		}
 	}
 
-	var params = "?page="+encodeURIComponent(page);
-	xhr.open("GET", "http://0.0.0.0:8080/listpeople"+params);
+	var params = "?page="+encodeURIComponent(currentPage);
+	xhr.open("GET", "/listpeople"+params);
 	//xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
 	xhr.send();
 }
 
 
-//var pageNumber = "page=";
-var page = 5;
-//var pageNumberSlice = pageNumber + page;
+var currentPage = 1;
 
-queryCall(page);
+function nextPage() {
+	currentPage++;
+	console.log("currentPage number: " + currentPage);
+	//currentPage = currentPage;
+	if (currentPage > 1){
+	    $("#previous").show();
+	}
+	queryCall(currentPage);
+}
 
+// hide prev button on page load
+if (currentPage <= 1){
+	$("#previous").hide();
+}
+
+
+function prevPage() {
+	currentPage--;
+	console.log("currentPage number: " + currentPage);
+	queryCall(currentPage);
+	
+}
 
 </script>
+
+
+{% endblock %}
+
+
+
