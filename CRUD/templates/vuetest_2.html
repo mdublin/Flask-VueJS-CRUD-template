@@ -94,7 +94,15 @@
 
     var xhr = new XMLHttpRequest();
     //xhr.addEventListener("load", reqListener);
+
+    console.log(xhr.readyState); 
+
+	// monitoring readyState of xhr object, when readyState == 4 or Done, function will be called
 	xhr.onreadystatechange = function() {
+		console.log("calling function");
+
+		console.log(xhr.readyState);
+
 		if(xhr.readyState == XMLHttpRequest.DONE) {
 			//alert(xhr.responseText);
 			//console.log(xhr.response);
@@ -140,7 +148,9 @@
 	}
 	
 	xhr.open("GET", "http://0.0.0.0:8080/listpeople");
-	xhr.send(current_page);
+	xhr.send();
+
+	console.log(xhr.readyState);
 
 
 

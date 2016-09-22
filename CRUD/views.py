@@ -11,7 +11,7 @@ from query_handler import query_handler
 
 # PAGINATE_BY is a module constant that indicates how many should be on
 # each page
-PAGINATE_BY = 3
+PAGINATE_BY = 10
 
 from flask.ext.login import login_required
 
@@ -67,11 +67,18 @@ def success_confirm():
 @app.route("/listpeople/")
 def getperson():
     print(request)
+    print(request.form)
+    
+    page_num = request.args.get('page')
+
+    results_slice_stop = (PAGINATE_BY * int(page_num)) 
+    results_slice_start = (PAGINATE_BY * (int(page_num) - 1))
+    
     display_entries = {}
     count = 0
 
     query_results = session.query(Person).all()
-    query_results = query_results[:PAGINATE_BY]
+    query_results = query_results[results_slice_start:results_slice_stop]
     
    #for person in session.query(Person).all():
     for person in query_results:
@@ -89,13 +96,14 @@ current_search_query = None
 @app.route("/searchpeople", methods=["GET", "POST"])
 @app.route("/searchpeople/page/<int:page>")
 def searchpeople(page=1):
+    # if no search_query in URL will evaluate to None 
     search_query = request.args.get('search_for')
+    print(search_query)
 
-    print(request.path)
-    # print(request.form)
-    # print(search_query)
+    # for general db display, returns all entries, paginated
+    if (search_query is None or search_query == u""):
+        print("inside if search_query is None")
 
-    if search_query is None:
         get_all_entries = session.query(Person).all()
         count = session.query(Person).count()
 
@@ -127,21 +135,24 @@ def searchpeople(page=1):
 
         # return render_template("searchpeople.html")
 
+
+
     # checking if unicode string is empty (i.e. someone just clicked search
     # with an empty search field)
-    if not search_query:
-        noresult = True
-        return render_template("searchpeople.html", noresult=noresult)
+    #if not search_query:
+    #    print("inside if not search_query")
+    #    noresult = True
+    #    return render_template("searchpeople.html", noresult=noresult)
+    
     # cleaning up any possible trailing white space
-    if search_query is not None:
-        search_query = search_query.rstrip()
+    #if search_query is not None:
+    #    search_query = search_query.rstrip()
 
     # search_query is a unicode as Flask, Jinja2 are all Unicode based
 
     people = session.query(Person)
     #search_results = people.filter_by(firstname = search_query).first()
 
-    print(request.method)
 
     # DELETE request handler
     if request.method == "POST":
@@ -182,8 +193,8 @@ def searchpeople(page=1):
             # return ("entry updated")
 
     # when page is initially loaded 
-    if search_query is None:
-        return render_template("searchpeople.html")
+    #if search_query is None:
+    #    return render_template("searchpeople.html")
 
     else:
        
@@ -199,7 +210,8 @@ def searchpeople(page=1):
             print("regex match")
             #return redirect(url_for('searchpeople', search_query=search_query))
             return redirect('/searchpeople?search_for={}'.format(search_query))
-
+        
+        # END OF NEW SEARCH QUERY CHECK LOGIC
 
 
         print("submitting search_query to query_handler....")
@@ -243,6 +255,9 @@ def searchpeople(page=1):
                                )
 
 
+
+
+
 @app.route('/searchresults/<string:search_Person>')
 def searchresults(search_Person):
     # print(request.args.get('search_for_input'))
@@ -273,6 +288,13 @@ def vuetest():
 @app.route('/vuetest_2/')
 def vuetest_2():
     return render_template('vuetest_2.html')
+
+
+
+
+@app.route('/ajaxtest/')
+def ajaxtest():
+    return render_template('ajaxtest.html')
 
 
 # Version of searchpeople view with Ajax pagination

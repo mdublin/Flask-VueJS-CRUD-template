@@ -1,0 +1,64 @@
+<script>
+
+
+function queryCall(page) {
+    var xhr = new XMLHttpRequest();
+    xhr.onreadystatechange = function() {
+		console.log("calling function");
+
+		console.log(xhr.readyState);
+
+		if(xhr.readyState == XMLHttpRequest.DONE) {
+			//alert(xhr.responseText);
+			//console.log(xhr.response);
+
+		    //apiResponse = xhr.responseText;
+
+		    apiResponse = xhr.response;
+			// converting json server response string to json object
+			apiResponse = JSON.parse(apiResponse);
+
+			//console.log(apiResponse);
+
+		    itemsArray = [];
+
+			for(var i = 0; i < apiResponse.length; i++){
+				console.log(apiResponse[i]);
+			}
+
+			for (var entry in apiResponse) {
+				console.log(apiResponse[entry]);
+				itemsArray.push(apiResponse[entry]);
+			}
+
+			// vue.js
+			/*var vm = new Vue({
+				el: '#test',
+				data: {
+					parentMessage: 'Parent',
+					items: itemsArray
+					//items: [
+					//	{ message: 'Foo' },
+					//	{ message: 'Bar' }
+					//]
+				}
+			})*/
+
+		}
+	}
+
+	var params = "?page="+encodeURIComponent(page);
+	xhr.open("GET", "http://0.0.0.0:8080/listpeople"+params);
+	//xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+	xhr.send();
+}
+
+
+//var pageNumber = "page=";
+var page = 5;
+//var pageNumberSlice = pageNumber + page;
+
+queryCall(page);
+
+
+</script>
