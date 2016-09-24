@@ -189,20 +189,7 @@ function queryCall(currentPage) {
 			console.log(itemsArray);
 			updateVueInstance(itemsArray);
 
-			// vue.js
-			/*var vm = new Vue({
-				el: '#test',
-				data: {
-					parentMessage: 'Parent',
-					items: itemsArray
-					//items: [
-					//	{ message: 'Foo' },
-					//	{ message: 'Bar' }
-					//]
 				}
-				}) */
-
-		}
 	}
 
 	var params = "?page="+encodeURIComponent(currentPage);
@@ -290,29 +277,13 @@ function ajaxTest(msg, event){
 	oReq.onload = function(oEvent) {
 		if(oReq.status == 200) {
 			console.log("DONE");
-			$('UpdateModal--'+indexNum).modal('hide');
+			$('#UpdateModal--'+indexNum).modal('hide');
 			console.log('UpdateModal--'+msg);
 		} else {
 			console.log("There's a problem");
 		}
 	};
-			/*
-
-	form.addEventListener('submit', function(ev) {
-		oData = new FormData(form);
-		console.log(oData);
-		var oReq = new XMLHttpRequest();
-		oReq.open("POST", "/searchpeople", true);
-		oReq.onload = function(oEvent) {
-			if (oReq.status == 200) {
-				console.log("Uploaded!");
-				$('#myModal').modal('hide')
-			} else {
-				console.log("PROBLEM!!!!");
-			}
-		};
-	 */
-
+			
 	oData = new FormData(form);
 	console.log(oData.values());
   oReq.open("POST", "/searchpeople", true);
@@ -322,14 +293,6 @@ function ajaxTest(msg, event){
 }
 
 
-function getFormCallback() {
-	var updateForm = document.forms.namedItem("updateForm");
-	updateForm.addEventListener('submit', function(event) {
-		alert("HELLO HELLO");
-		oData = new FormData(updateForm);
-		console.log(oData.values());
-	})
-}
 
 
 
