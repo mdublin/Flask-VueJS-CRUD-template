@@ -67,7 +67,6 @@ def success_confirm():
 @app.route("/listpeople/")
 def getperson():
     print(request)
-    print(request.form)
     
     page_num = request.args.get('page')
 
@@ -96,9 +95,12 @@ current_search_query = None
 @app.route("/searchpeople", methods=["GET", "POST"])
 @app.route("/searchpeople/page/<int:page>")
 def searchpeople(page=1):
+    print(request)
     # if no search_query in URL will evaluate to None 
     search_query = request.args.get('search_for')
     print(search_query)
+
+    print(request.form)
 
     # for general db display, returns all entries, paginated
     if (search_query is None or search_query == u""):
