@@ -236,20 +236,6 @@ function prevPage() {
 
 
 
-function updateEntry(){
-	console.log("updateEntry called");
-	
-}
-
-
-function deleteEntry(){
-	
-} 
-
-
-
-
-
 // loading results on page load
 window.addEventListener("load", function load(event) {
 	queryCall(currentPage);
@@ -278,7 +264,7 @@ function ajaxTest(msg, event){
 		if(oReq.status == 200) {
 			console.log("DONE");
 			$('#UpdateModal--'+indexNum).modal('hide');
-			console.log('UpdateModal--'+msg);
+			console.log("Updated db entry: " + oReq.response);
 		} else {
 			console.log("There's a problem");
 		}

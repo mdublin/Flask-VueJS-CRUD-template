@@ -103,7 +103,7 @@ def searchpeople(page=1):
     print(request.form)
 
     # for general db display, returns all entries, paginated
-    if (search_query is None or search_query == u""):
+    if (search_query is None or search_query == u"") and request.method == "GET":
         print("inside if search_query is None")
 
         get_all_entries = session.query(Person).all()
@@ -177,22 +177,38 @@ def searchpeople(page=1):
 
             id = request.form["db_id"]
 
+            # checking for values in the submitted form
             if request.form["firstname"] != '':
                 update_dbentry = session.query(Person).filter_by(id=id).update(
                     {"firstname": "%s" % (request.form["firstname"])})
+
             if request.form["lastname"] != '':
                 update_dbentry = session.query(Person).filter_by(id=id).update(
                     {"lastname": "%s" % (request.form["lastname"])})
+            
             if request.form["DOB"] != '':
                 update_dbentry = session.query(Person).filter_by(
                     id=id).update({"dob": "%s" % (request.form["DOB"])})
+
             if request.form["zipcode"] != '':
                 update_dbentry = session.query(Person).filter_by(id=id).update(
                     {"zipcode": "%s" % (request.form["zipcode"])})
 
+            # getting updated entry to pass back to Ajax caller, which will pass to vue to update item
+
             session.commit()
-            # return (request.url)
-            # return ("entry updated")
+
+            updated_entry = {}
+
+            get_updated_entry = session.query(Person).filter_by(id=id)
+            for result in get_updated_entry:
+                 result = result.__dict__
+                 del result['_sa_instance_state']
+                 updated_entry[id] = result
+
+
+            #print(jsonify(updated))
+            return jsonify(updated_entry)
 
     # when page is initially loaded 
     #if search_query is None:
