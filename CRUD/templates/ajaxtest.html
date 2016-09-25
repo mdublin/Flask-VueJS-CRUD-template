@@ -39,7 +39,7 @@
 <!-- DELETE Modal -->
 <!-- <form action={{ url_for('searchpeople') }} role="form" method="POST"> -->
 <form action="" role="form" method="POST" name="delete -- ${$index}" id="delete -- ${$index}"> 
-	  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" /> 
+	<input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
 	  <div class="modal fade" id="DeleteModal--${ $index }" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
 		<div class="modal-content" id="del--${ $index }">
@@ -61,10 +61,11 @@
 
 <!-- UPDATE Modal -->
 
-<form name="updateForm" method="POST" enctype="multipart/form-data" name="updateForm" id="updateForm">
+<form action="" method="POST" enctype="multipart/form-data" name="updateForm" id="updateForm--${$index}">
 	<!-- <form name="updateForm" id="updateForm"> -->
 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" /> 	
-	<div class="modal fade" id="UpdateModal--${ $index }" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+<input type="hidden" name="vue_page_index" value="${$index}" />
+<div class="modal fade" id="UpdateModal--${ $index }" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
         <div class="modal-dialog" role="document">
 			<div class="modal-content" id="${ $index }">
                 <div class="modal-header">
@@ -255,8 +256,10 @@ function ajaxTest(msg, event){
 	console.log("this is indexNum: " + indexNum);
 
 
-	var form = document.forms.namedItem("updateForm");
-	console.log(form);
+	//var form = document.forms.namedItem("updateForm");
+    var form = document.getElementById("updateForm--"+indexNum);
+
+    console.log(form);
 
 	var oReq = new XMLHttpRequest();
 
@@ -265,6 +268,14 @@ function ajaxTest(msg, event){
 			console.log("DONE");
 			$('#UpdateModal--'+indexNum).modal('hide');
 			console.log("Updated db entry: " + oReq.response);
+			apiResponse = JSON.parse(oReq.response);
+	
+			console.log("now updating vue instance....");
+			var vueIndex = apiResponse['entry_vue_page_$index'];
+			console.log(vueIndex);
+
+			vm.items.$set(vueIndex, {firstname: apiResponse[vueIndex]["firstname"], lastname: apiResponse[vueIndex]["lastname"], dob: apiResponse[vueIndex]["dob"], zipcode: apiResponse[vueIndex]["zipcode"], db_id: apiResponse[vueIndex]["id"]});
+
 		} else {
 			console.log("There's a problem");
 		}

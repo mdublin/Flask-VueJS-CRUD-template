@@ -172,6 +172,7 @@ def searchpeople(page=1):
                 deleteconfirmation=deleteconfirmation)
 
         else:
+            print("making update to entry")
             print(request.form)
             print(request.get_data())
 
@@ -199,15 +200,17 @@ def searchpeople(page=1):
             session.commit()
 
             updated_entry = {}
+            vueEntryIndex = request.form["vue_page_index"]
+            updated_entry["entry_vue_page_$index"] = vueEntryIndex
 
             get_updated_entry = session.query(Person).filter_by(id=id)
             for result in get_updated_entry:
                  result = result.__dict__
                  del result['_sa_instance_state']
-                 updated_entry[id] = result
+                 updated_entry[vueEntryIndex] = result
 
 
-            #print(jsonify(updated))
+            print(jsonify(updated_entry))
             return jsonify(updated_entry)
 
     # when page is initially loaded 
