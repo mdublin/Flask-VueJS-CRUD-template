@@ -11,7 +11,7 @@ from query_handler import query_handler
 
 # PAGINATE_BY is a module constant that indicates how many should be on
 # each page
-PAGINATE_BY = 10
+PAGINATE_BY = 5
 
 from flask.ext.login import login_required
 
@@ -167,9 +167,12 @@ def searchpeople(page=1):
                 Person).filter_by(id=person_to_delete).delete()
             session.commit()
             deleteconfirmation = True
-            return render_template(
-                "searchpeople.html",
-                deleteconfirmation=deleteconfirmation)
+            confirm_message = {'delete_confirmation': 'id: {}'.format(person_to_delete)}
+            return jsonify(confirm_message)
+
+            #return render_template(
+            #    "searchpeople.html",
+            #    deleteconfirmation=deleteconfirmation)
 
         else:
             print("making update to entry")
@@ -265,15 +268,27 @@ def searchpeople(page=1):
 
         global current_search_query
         current_search_query = search_query
+ 
+        display_entries = {}
+        for person in search_results:
+            print person.__dict__
+            count += 1
+            db_dict = person.__dict__
+            del db_dict['_sa_instance_state']
+            display_entries[count] = db_dict
 
-        return render_template("searchpeople.html",
-                               people=search_results,
-                               search_for=search_query,
-                               has_next=has_next,
-                               has_prev=has_prev,
-                               page=page,
-                               total_pages=total_pages
-                               )
+        return(jsonify(display_entries))
+
+
+
+        #return render_template("searchpeople.html",
+        #                       people=search_results,
+        #                       search_for=search_query,
+        #                       has_next=has_next,
+        #                       has_prev=has_prev,
+        #                       page=page,
+        #                       total_pages=total_pages
+        #                       )
 
 
 

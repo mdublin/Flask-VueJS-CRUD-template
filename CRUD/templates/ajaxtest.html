@@ -11,20 +11,31 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
 <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 
-<!--
-<ul id="test">
-  <template v-for="item in items" track-by="$index">
-	  <li>${ item.firstname }</li>
-    <li class="divider"></li>
-  </template>
-</ul>
 
--->
+<div class="container" id="events">
+
+<br></br>
+<div class="row">
+	<div class="col-lg-6">
+		<form action="" method="GET" id="searchForm">
+			<div class="input-group">
+				<input type="text" class="form-control" id="search_form_input" name="search_for" placeholder="Search for...">
+				<span class="input-group-btn">
+				<!-- <button class="btn btn-primary btn-outline" type="submit">Search!</button> -->
+					<button type="submit" v-on:click="searchButton($event)" class="btn btn-primary btn-outline">Search!</button>
+          </span>
+    </div>
+</form>
+</div>
+</div>
+<br></br>
+<br></br>
+
 
 	   <!-- </template> -->
-<div v-for="(index, item) in items" id="test2">
+   <div v-for="(index, item) in items" id="test2">
 
-<div class="list-group" id="test">
+	<div class="list-group" id="entry--${ $index }">
 	<!--	<template v-for="item in items" track-by="$index"> -->
 	<a href="#" class="list-group-item active">
 	  <b>Name:</b> ${ item.firstname} ${ item.lastname }</a>
@@ -38,7 +49,7 @@
 
 <!-- DELETE Modal -->
 <!-- <form action={{ url_for('searchpeople') }} role="form" method="POST"> -->
-<form action="" role="form" method="POST" name="delete -- ${$index}" id="delete -- ${$index}"> 
+<form action="" role="form" method="POST" name="delete" id="delete--${$index}"> 
 	<input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
 	  <div class="modal fade" id="DeleteModal--${ $index }" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
@@ -47,11 +58,13 @@
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
-                <h4 class="modal-title-warning" id="myModalLabel">Are you sure you want to delete this person?</h4>
+				<h4 class="modal-title-warning" id="myModalLabel">Are you sure you want to delete this person?</h4>
+				<input type="hidden" name="delete_id" value="${ item.id }" />
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                <button type="submit" class="btn btn-danger" name="delete_id" value="${ item.id }">Confirm Delete</button>
+				<button type="submit" v-on:click="deleteButton($index, $event)" class="btn btn-danger" >Confirm Delete</button>
+				
             </div>
         </div>
     </div>
@@ -81,7 +94,6 @@
 					</div>
                     <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-					<button type="submit" id="updateButton" class="btn btn-success">Save Changes</button>
 					<button type="submit" v-on:click="updateFormButton($index, $event)" class="btn btn-success" >Save Changes</button>
 
 					
@@ -107,8 +119,12 @@
 	</ul>
 
 
-	
-	
+</div>
+
+
+
+
+
 <script>
 
 var itemsArray = [];
@@ -116,29 +132,27 @@ var itemsArray = [];
 Vue.config.delimiters = ["${", "}"];
 
 var vm = new Vue({
-	el: '#test2',
-	data: {
+	//el: '#test2',
+    el: '#events',
+    data: {
 		parentMessage: 'Parent',
 		items: itemsArray
-		//items: [
-		//	{ message: 'Foo' },
-		//	{ message: 'Bar' }
-		//]
 	},
 	
 	methods: {
 		updateFormButton: function (msg, event) {
-			//console.log(msg);
-			//alert(msg);
-		// `this` inside methods point to the Vue instance
-	        //alert('Hello ' + this.name + '!');
-			// `event` is the native DOM event
-			//alert(event.target.tagName);
-		     event.preventDefault();
-	         ajaxTest(msg, event);
-			 //event.preventDefault();
-
+			event.preventDefault();
+			updateEntry(msg, event);
 		},
+		deleteButton: function (msg, event){
+			event.preventDefault();
+			deleteEntry(msg, event);
+		},
+		searchButton: function(event){
+			event.preventDefault();
+			var searchQueryCalled = true;
+			queryCall(event,searchQueryCalled);
+		}
 		
 	}
 
@@ -154,8 +168,9 @@ function updateVueInstance(itemsArray) {
 }
 
 
+
 // GET request to listpeople general load endpoint 
-function queryCall(currentPage) {
+function queryCall(currentPage, searchQueryCalled) {
     var xhr = new XMLHttpRequest();
     xhr.onreadystatechange = function() {
 		console.log("calling function");
@@ -192,23 +207,40 @@ function queryCall(currentPage) {
 
 				}
 	}
+	
+	//for search submission, not general query load
+    if(searchQueryCalled){
+		console.log("searchQueryCalled");
+		var form = document.getElementById("searchForm");
+		oData = new FormData(form);
 
-	var params = "?page="+encodeURIComponent(currentPage);
-	xhr.open("GET", "/listpeople"+params);
-	//xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-	xhr.send();
+		//var params = "?search_for="+encodeURIComponent(oData.get("search_for"));
+	    searchQuery = oData.get("search_for");
+
+	    if(currentPage > 1){
+			var params =  "/page/"+encodeURIComponent(currentPage)+"?search_for="+encodeURIComponent(searchQuery);
+		} else {
+			var params = "?search_for="+encodeURIComponent(oData.get("search_for"));
+		}
+
+		xhr.open("GET", "/searchpeople"+params);
+		//xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+	    xhr.send();
+
+
+
+	} else {
+		var params = "?page="+encodeURIComponent(currentPage);
+		xhr.open("GET", "/listpeople"+params);
+		//xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+	    xhr.send();
+	
+	}
 }
 
 
 
-
-
-
-
-
-
-
-
+var searchQuery; 
 
 var currentPage = 1;
 
@@ -219,7 +251,11 @@ function nextPage() {
 	if (currentPage > 1){
 	    $("#previous").show();
 	}
-	queryCall(currentPage);
+	if(searchQuery){ 
+		queryCall(currentPage, searchQuery)
+	} else {
+		queryCall(currentPage);	
+	}
 }
 
 // hide prev button on page load
@@ -231,7 +267,11 @@ if (currentPage <= 1){
 function prevPage() {
 	currentPage--;
 	console.log("currentPage number: " + currentPage);
-	queryCall(currentPage);
+	if(searchQuery){ 
+		queryCall(currentPage, searchQuery)
+	} else {
+		queryCall(currentPage);	
+	}
 	
 }
 
@@ -244,29 +284,19 @@ window.addEventListener("load", function load(event) {
 
 
 
-
-function ajaxTest(msg, event){
-	
-	console.log("ajaxTest called!!!");
-	
-
-	console.log(msg);
+// UDPDATE ENTRY
+function updateEntry(msg, event){
 	
 	var indexNum = msg;
-	console.log("this is indexNum: " + indexNum);
-
-
-	//var form = document.forms.namedItem("updateForm");
     var form = document.getElementById("updateForm--"+indexNum);
-
-    console.log(form);
-
 	var oReq = new XMLHttpRequest();
 
 	oReq.onload = function(oEvent) {
 		if(oReq.status == 200) {
 			console.log("DONE");
+			// Bootstrap JQuery method for closing the modal after submit using Ajax
 			$('#UpdateModal--'+indexNum).modal('hide');
+			
 			console.log("Updated db entry: " + oReq.response);
 			apiResponse = JSON.parse(oReq.response);
 	
@@ -278,6 +308,7 @@ function ajaxTest(msg, event){
 
 		} else {
 			console.log("There's a problem");
+			console.log(oReq.status);
 		}
 	};
 			
@@ -290,8 +321,48 @@ function ajaxTest(msg, event){
 }
 
 
+// DELETE entry 
+function deleteEntry(msg) {
+
+	var indexNum = msg;
+	var delForm = document.getElementById("delete--"+indexNum);
+	
+	var oReq = new XMLHttpRequest();
+
+	oReq.onload = function(event){
+		if(oReq.status == 200){
+			console.log(JSON.parse(oReq.response));
+			$('#DeleteModal--'+indexNum).modal('hide');
+			$("#entry--"+indexNum).hide();
+		} else {
+			console.log(oReq.status);
+		}
+	}
+
+	
+	oData = new FormData(delForm);
+	console.log(oData.values());
+	oReq.open("POST", "/searchpeople", true);
+	oReq.send(oData);
+	//event.preventDefault();
+
+}
 
 
+
+//search query
+/*
+function searchQuery(){
+
+
+
+	var form = document.getElementById("searchForm");	
+	oData = new FormData(form);
+	oReq.open("POST", "/searchpeople", true);
+	oReq.send(oData);
+	
+}
+*/
 
 
 </script>
