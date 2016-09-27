@@ -256,6 +256,7 @@ function nextPage() {
 	} else {
 		queryCall(currentPage);	
 	}
+
 }
 
 // hide prev button on page load
@@ -272,7 +273,10 @@ function prevPage() {
 	} else {
 		queryCall(currentPage);	
 	}
-	
+	if (currentPage <= 1){
+	$("#previous").hide();
+    }
+
 }
 
 

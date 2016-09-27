@@ -41,6 +41,7 @@ def query_handler(search_query):
 
         count = session.query(Person).filter(or_(Person.firstname.like(search_query), Person.lastname.like(search_query))).count()
 
+        print(count)
 
         for results in search_results:
             print results.__dict__

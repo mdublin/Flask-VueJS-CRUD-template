@@ -11,13 +11,13 @@ from query_handler import query_handler
 
 # PAGINATE_BY is a module constant that indicates how many should be on
 # each page
-PAGINATE_BY = 5
+PAGINATE_BY = 10
 
 from flask.ext.login import login_required
 
 
 @app.route("/")
-def index():
+def home():
     return render_template("index.html")
 
 
@@ -77,6 +77,10 @@ def getperson():
     count = 0
 
     query_results = session.query(Person).all()
+    
+    # getting query results count to pass to include with server Ajax response
+    display_entries = {'results_count': len(query_results)}
+
     query_results = query_results[results_slice_start:results_slice_stop]
     
    #for person in session.query(Person).all():
@@ -221,7 +225,7 @@ def searchpeople(page=1):
     #    return render_template("searchpeople.html")
 
     else:
-       
+        print("SEARCH QUERY")
         # NEW SEARCH QUERY CHECK LOGIC
         #check if there is already a query paramter in the URL with pagination
 # use case is if user has paginated through initial returns query results, and then goes to try another search. Search query results will be presented with the most recent page, instead of staring from first results first page in query results. 
@@ -269,13 +273,16 @@ def searchpeople(page=1):
         global current_search_query
         current_search_query = search_query
  
-        display_entries = {}
+        display_entries = {'results_count': count}
         for person in search_results:
             print person.__dict__
             count += 1
             db_dict = person.__dict__
             del db_dict['_sa_instance_state']
             display_entries[count] = db_dict
+
+        print("display_entries: ")
+        print(display_entries)
 
         return(jsonify(display_entries))
 
