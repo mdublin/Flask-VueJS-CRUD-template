@@ -48,7 +48,7 @@
 	   
 
 <!-- DELETE Modal -->
-<!-- <form action={{ url_for('searchpeople') }} role="form" method="POST"> -->
+<!-- <form action={{ url_for('main.searchpeople') }} role="form" method="POST"> -->
 <form action="" role="form" method="POST" name="delete" id="delete--${$index}"> 
 	<input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
 	  <div class="modal fade" id="DeleteModal--${ $index }" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">

@@ -6,28 +6,28 @@ from sqlalchemy import ForeignKey
 from sqlalchemy.orm import relationship
 
 # import the app Flask object from the blog package, courtesy of __init__.py
-from CRUD import app
+from . import db
 
 # engine object is created to as an object that talks to the db at the db URI specified in config.py
 
-engine = create_engine(app.config["SQLALCHEMY_DATABASE_URI"])
-Base = declarative_base()
-Session = sessionmaker(bind=engine)
-session = Session()
+#engine = create_engine(app.config["SQLALCHEMY_DATABASE_URI"])
+#Base = declarative_base()
+#Session = sessionmaker(bind=engine)
+#session = Session()
 
 import datetime
-from sqlalchemy import Column, Integer, String, Text, DateTime
-from .database import Base, engine
+#from sqlalchemy import Column, Integer, String, Text, DateTime
+#from .database import Base, engine
 
 
-class Person(Base):
+class Person(db.Model):
     __tablename__ = "Persons"
 
-    id = Column(Integer, primary_key=True)
-    firstname = Column(String(500))
-    lastname = Column(String(500))
-    dob = Column(String(10))
-    zipcode = Column(String(20))
+    id = db.Column(db.Integer, primary_key=True)
+    firstname = db.Column(db.String(500))
+    lastname = db.Column(db.String(500))
+    dob = db.Column(db.String(10))
+    zipcode = db.Column(db.String(20))
 
-Base.metadata.create_all(engine)
+#Base.metadata.create_all(engine)
 

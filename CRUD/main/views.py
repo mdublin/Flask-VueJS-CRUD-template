@@ -1,8 +1,10 @@
 
-from flask import render_template, jsonify
+from . import main
+from .. import db
 
-from CRUD import app
-from .database import session, Person
+from flask import render_template, jsonify, url_for, request, redirect, current_app
+
+from ..database import Person
 from sqlalchemy import select, or_, and_
 
 import re
@@ -16,16 +18,16 @@ PAGINATE_BY = 10
 from flask.ext.login import login_required
 
 
-@app.route("/")
+@main.route("/")
 def home():
     return render_template("index.html")
 
 
-from flask import request, redirect, url_for
 from flask.ext.login import current_user
 
 
-@app.route("/addperson/", methods=["GET", "POST"])
+
+@main.route("/addperson/", methods=["GET", "POST"])
 def addperson():
     print(request)
     if request.method == "POST":
@@ -38,8 +40,8 @@ def addperson():
             dob=request.form["DOB"],
             zipcode=request.form["postalCode"]
         )
-        session.add(people)
-        session.commit()
+        db.session.add(people)
+        db.session.commit()
         display_entries = {}
         # count is just acting as a key for the value, which is every person
         # dict row entry representation
@@ -51,39 +53,33 @@ def addperson():
             display_entries[count] = db_dict
             count += 1
 
-        # return(jsonify(display_entries))
-        # return ("<h1>POST OKAY</h1>")
-        # return redirect(url_for("people"))
     return render_template("addperson.html")
 
 
-@app.route("/successconfirm/")
+@main.route("/successconfirm/")
 def success_confirm():
     return render_template("successconfirm.html")
 
 
-
-# API GET endpoint for people 
-@app.route("/listpeople/")
+# API GET endpoint for people
+@main.route("/listpeople/")
 def getperson():
     print(request)
-    
+
     page_num = request.args.get('page')
 
-    results_slice_stop = (PAGINATE_BY * int(page_num)) 
+    results_slice_stop = (PAGINATE_BY * int(page_num))
     results_slice_start = (PAGINATE_BY * (int(page_num) - 1))
-    
     display_entries = {}
     count = 0
+    query_results = db.session.query(Person).all()
 
-    query_results = session.query(Person).all()
-    
     # getting query results count to pass to include with server Ajax response
     display_entries = {'results_count': len(query_results)}
 
     query_results = query_results[results_slice_start:results_slice_stop]
-    
-   #for person in session.query(Person).all():
+
+   # for person in session.query(Person).all():
     for person in query_results:
         print person.__dict__
         count += 1
@@ -96,11 +92,12 @@ def getperson():
 
 current_search_query = None
 
-@app.route("/searchpeople", methods=["GET", "POST"])
-@app.route("/searchpeople/page/<int:page>")
+
+@main.route("/searchpeople", methods=["GET", "POST"])
+@main.route("/searchpeople/page/<int:page>")
 def searchpeople(page=1):
     print(request)
-    # if no search_query in URL will evaluate to None 
+    # if no search_query in URL will evaluate to None
     search_query = request.args.get('search_for')
     print(search_query)
 
@@ -110,8 +107,8 @@ def searchpeople(page=1):
     if (search_query is None or search_query == u"") and request.method == "GET":
         print("inside if search_query is None")
 
-        get_all_entries = session.query(Person).all()
-        count = session.query(Person).count()
+        get_all_entries = db.session.query(Person).all()
+        count = db.session.query(Person).count()
 
         print("Total db entries count: {}".format(count))
 
@@ -139,26 +136,8 @@ def searchpeople(page=1):
                                total_pages=total_pages
                                )
 
-        # return render_template("searchpeople.html")
 
-
-
-    # checking if unicode string is empty (i.e. someone just clicked search
-    # with an empty search field)
-    #if not search_query:
-    #    print("inside if not search_query")
-    #    noresult = True
-    #    return render_template("searchpeople.html", noresult=noresult)
-    
-    # cleaning up any possible trailing white space
-    #if search_query is not None:
-    #    search_query = search_query.rstrip()
-
-    # search_query is a unicode as Flask, Jinja2 are all Unicode based
-
-    people = session.query(Person)
-    #search_results = people.filter_by(firstname = search_query).first()
-
+    people = db.session.query(Person)
 
     # DELETE request handler
     if request.method == "POST":
@@ -167,14 +146,15 @@ def searchpeople(page=1):
             print(request.form)
             print(request.get_data())
             person_to_delete = request.form["delete_id"]
-            delete_person_by_id = session.query(
+            delete_person_by_id = db.session.query(
                 Person).filter_by(id=person_to_delete).delete()
-            session.commit()
+            db.session.commit()
             deleteconfirmation = True
-            confirm_message = {'delete_confirmation': 'id: {}'.format(person_to_delete)}
+            confirm_message = {
+                'delete_confirmation': 'id: {}'.format(person_to_delete)}
             return jsonify(confirm_message)
 
-            #return render_template(
+            # return render_template(
             #    "searchpeople.html",
             #    deleteconfirmation=deleteconfirmation)
 
@@ -187,60 +167,61 @@ def searchpeople(page=1):
 
             # checking for values in the submitted form
             if request.form["firstname"] != '':
-                update_dbentry = session.query(Person).filter_by(id=id).update(
+                update_dbentry = db.session.query(Person).filter_by(id=id).update(
                     {"firstname": "%s" % (request.form["firstname"])})
 
             if request.form["lastname"] != '':
-                update_dbentry = session.query(Person).filter_by(id=id).update(
+                update_dbentry = db.session.query(Person).filter_by(id=id).update(
                     {"lastname": "%s" % (request.form["lastname"])})
-            
+
             if request.form["DOB"] != '':
-                update_dbentry = session.query(Person).filter_by(
+                update_dbentry = db.session.query(Person).filter_by(
                     id=id).update({"dob": "%s" % (request.form["DOB"])})
 
             if request.form["zipcode"] != '':
-                update_dbentry = session.query(Person).filter_by(id=id).update(
+                update_dbentry = db.session.query(Person).filter_by(id=id).update(
                     {"zipcode": "%s" % (request.form["zipcode"])})
 
-            # getting updated entry to pass back to Ajax caller, which will pass to vue to update item
+            # getting updated entry to pass back to Ajax caller, which will
+            # pass to vue to update item
 
-            session.commit()
+            db.session.commit()
 
             updated_entry = {}
             vueEntryIndex = request.form["vue_page_index"]
             updated_entry["entry_vue_page_$index"] = vueEntryIndex
 
-            get_updated_entry = session.query(Person).filter_by(id=id)
+            get_updated_entry = db.session.query(Person).filter_by(id=id)
             for result in get_updated_entry:
-                 result = result.__dict__
-                 del result['_sa_instance_state']
-                 updated_entry[vueEntryIndex] = result
-
+                result = result.__dict__
+                del result['_sa_instance_state']
+                updated_entry[vueEntryIndex] = result
 
             print(jsonify(updated_entry))
             return jsonify(updated_entry)
 
-    # when page is initially loaded 
-    #if search_query is None:
+    # when page is initially loaded
+    # if search_query is None:
     #    return render_template("searchpeople.html")
 
     else:
         print("SEARCH QUERY")
         # NEW SEARCH QUERY CHECK LOGIC
-        #check if there is already a query paramter in the URL with pagination
-# use case is if user has paginated through initial returns query results, and then goes to try another search. Search query results will be presented with the most recent page, instead of staring from first results first page in query results. 
+        # check if there is already a query paramter in the URL with pagination
+# use case is if user has paginated through initial returns query results, and then goes to try another search. Search query results will be presented with the most recent page, instead of staring from first results first page in query results.
         # regex to compare current path to original URL route
 
         current_url = request.path
         print("current_url: {}".format(current_url))
         regex = re.compile(r'/searchpeople/page/[0-9]')
-        if regex.match(current_url) is not None and (current_search_query != search_query):
+        if regex.match(current_url) is not None and (
+                current_search_query != search_query):
             print("regex match")
-            #return redirect(url_for('searchpeople', search_query=search_query))
+            # return redirect(url_for('searchpeople',
+            # search_query=search_query))
             return redirect('/searchpeople?search_for={}'.format(search_query))
-        
-        # END OF NEW SEARCH QUERY CHECK LOGIC
 
+        # END OF NEW SEARCH QUERY CHECK LOGIC
 
         print("submitting search_query to query_handler....")
         call_query_handler = query_handler(search_query)
@@ -272,7 +253,7 @@ def searchpeople(page=1):
 
         global current_search_query
         current_search_query = search_query
- 
+
         display_entries = {'results_count': count}
         for person in search_results:
             print person.__dict__
@@ -286,9 +267,7 @@ def searchpeople(page=1):
 
         return(jsonify(display_entries))
 
-
-
-        #return render_template("searchpeople.html",
+        # return render_template("searchpeople.html",
         #                       people=search_results,
         #                       search_for=search_query,
         #                       has_next=has_next,
@@ -298,10 +277,7 @@ def searchpeople(page=1):
         #                       )
 
 
-
-
-
-@app.route('/searchresults/<string:search_Person>')
+@main.route('/searchresults/<string:search_Person>')
 def searchresults(search_Person):
     # print(request.args.get('search_for_input'))
 
@@ -314,36 +290,32 @@ def searchresults(search_Person):
     return render_template('searchresults.html')
 
 
-@app.route("/viewpeople/")
+@main.route("/viewpeople/")
 def viewpeople():
-    '''
-    view all people in db
-    '''
+    #view all people in db
     return render_template('viewpeople.html')
 
 
-@app.route("/vuetest/")
+@main.route("/vuetest/")
 def vuetest():
     message = "testestestest"
     return render_template('vuetest.html')
 
 
-@app.route('/vuetest_2/')
+@main.route('/vuetest_2/')
 def vuetest_2():
     return render_template('vuetest_2.html')
 
 
-
-
-@app.route('/ajaxtest/')
+@main.route('/ajaxtest/')
 def ajaxtest():
     return render_template('ajaxtest.html')
 
 
 # Version of searchpeople view with Ajax pagination
 
-@app.route("/searchpeople_ajax", methods=["GET", "POST"])
-@app.route("/searchpeople_ajax/page/<int:page>")
+@main.route("/searchpeople_ajax", methods=["GET", "POST"])
+@main.route("/searchpeople_ajax/page/<int:page>")
 def searchpeople_ajax():
     search_query = request.args.get('search_for')
 
@@ -351,8 +323,8 @@ def searchpeople_ajax():
     # print(search_query)
 
     if search_query is None:
-        get_all_entries = session.query(Person).all()
-        count = session.query(Person).count()
+        get_all_entries = db.session.query(Person).all()
+        count = db.session.query(Person).count()
 
         print("Total db entries count: {}".format(count))
 
@@ -407,9 +379,9 @@ def searchpeople_ajax():
             print(request.form)
             print(request.get_data())
             person_to_delete = request.form["delete_id"]
-            delete_person_by_id = session.query(
+            delete_person_by_id = db.session.query(
                 Person).filter_by(id=person_to_delete).delete()
-            session.commit()
+            db.session.commit()
             deleteconfirmation = True
             return render_template(
                 "searchpeople_ajax.html",
@@ -422,19 +394,19 @@ def searchpeople_ajax():
             id = request.form["db_id"]
 
             if request.form["firstname"] != '':
-                update_dbentry = session.query(Person).filter_by(id=id).update(
+                update_dbentry = db.session.query(Person).filter_by(id=id).update(
                     {"firstname": "%s" % (request.form["firstname"])})
             if request.form["lastname"] != '':
-                update_dbentry = session.query(Person).filter_by(id=id).update(
+                update_dbentry = db.session.query(Person).filter_by(id=id).update(
                     {"lastname": "%s" % (request.form["lastname"])})
             if request.form["DOB"] != '':
-                update_dbentry = session.query(Person).filter_by(
+                update_dbentry = db.session.query(Person).filter_by(
                     id=id).update({"dob": "%s" % (request.form["DOB"])})
             if request.form["zipcode"] != '':
-                update_dbentry = session.query(Person).filter_by(id=id).update(
+                update_dbentry = db.session.query(Person).filter_by(id=id).update(
                     {"zipcode": "%s" % (request.form["zipcode"])})
 
-            session.commit()
+            db.session.commit()
             # return (request.url)
             # return ("entry updated")
 

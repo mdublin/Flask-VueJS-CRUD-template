@@ -1,15 +1,18 @@
-from .database import session, Person
+from ..database import Person
+from .. import db
+
 from sqlalchemy import select, or_, and_
+
 import re
 
-people = session.query(Person)
+#people = db.session.query(Person)
 
 def query_handler(search_query):
 
     # passed back to viewpeople view if no results are returned from search 
     #noresult = True
 
-    people = session.query(Person)
+    people = db.session.query(Person)
     print("query_handler called")
     
     #search_results = people.filter_by(firstname = search_query).first() or people.filter_by(lastname = search_query).first() or people.filter_by(dob = search_query).first() or people.filter_by(zipcode = search_query).first()
