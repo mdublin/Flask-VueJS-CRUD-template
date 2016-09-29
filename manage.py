@@ -25,6 +25,17 @@ def run():
 #from CRUD.database import session, Person
 
 
+@manager.command
+def test():
+    """ Run unit tests """
+    import unittest
+    tests = unittest.TestLoader().discover('tests')
+    unittest.TextTestRunner(verbosity=2).run(tests)
+
+
+
+
+
 # populating the db with dummy content
 @manager.command
 def seed():

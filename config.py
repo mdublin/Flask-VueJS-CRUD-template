@@ -24,13 +24,14 @@ class DevelopmentConfig(Config):
 
 
 # creating separate db URI for testing and using different secret key
-class TestingConfig(object):
+class TestingConfig(Config):
     SQLALCHEMY_DATABASE_URI = "postgresql://mdublin1@localhost:5432/CRUD-test"
+    TESTING = True
     DEBUG = False
     SECRET_KEY = "Not secret"
 
 # adding configuration to connect to Travis' Postgres db
-class TravisConfig(object):
+class TravisConfig(Config):
     SQLALCHEMY_DATABASE_URI = "postgresql://localhost:5432/CRUD"
     DEBUG = False
     SECRET_KEY = "Not secret"
