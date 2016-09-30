@@ -7,6 +7,8 @@ from CRUD import create_app, db
 class BasicsTestCase(unittest.TestCase):
     def setUp(self):
         self.app = create_app('testing')
+        # creating and than pushing the context because we use a create_app factory function, 
+        # which may not be globally known, so we have to activate it by pushing a context of it
         self.app_context = self.app.app_context()
         self.app_context.push()
         db.create_all()
@@ -21,5 +23,4 @@ class BasicsTestCase(unittest.TestCase):
 
     def test_app_is_testing(self):
         self.assertTrue(current_app.config['TESTING'])
-
 

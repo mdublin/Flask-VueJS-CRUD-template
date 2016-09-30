@@ -40,9 +40,9 @@ def query_handler(search_query):
         
         #search_results = session.query(Person).filter_by(firstname = search_query) and session.query(Person).filter_by(lastname = search_query)
 
-        search_results = session.query(Person).filter(or_(Person.firstname.like(search_query), Person.lastname.like(search_query)))
+        search_results = db.session.query(Person).filter(or_(Person.firstname.like(search_query), Person.lastname.like(search_query)))
 
-        count = session.query(Person).filter(or_(Person.firstname.like(search_query), Person.lastname.like(search_query))).count()
+        count = db.session.query(Person).filter(or_(Person.firstname.like(search_query), Person.lastname.like(search_query))).count()
 
         print(count)
 

@@ -19,7 +19,7 @@ from flask.ext.login import login_required
 
 
 @main.route("/")
-def home():
+def index():
     return render_template("index.html")
 
 
@@ -31,14 +31,16 @@ from flask.ext.login import current_user
 def addperson():
     print(request)
     if request.method == "POST":
-        print(request.get_data())
-        print(request.form)
+        #print(request.get_data())
+        #print(request.form)
+        print(request.get_json)
 
+	form_data = request.get_json()
         people = Person(
-            firstname=request.form["firstname"],
-            lastname=request.form["lastname"],
-            dob=request.form["DOB"],
-            zipcode=request.form["postalCode"]
+            firstname=form_data["firstname"],
+            lastname=form_data["lastname"],
+            dob=form_data["DOB"],
+            zipcode=form_data["postalCode"]
         )
         db.session.add(people)
         db.session.commit()
@@ -46,7 +48,7 @@ def addperson():
         # count is just acting as a key for the value, which is every person
         # dict row entry representation
         count = 0
-        for person in session.query(Person).all():
+        for person in db.session.query(Person).all():
             print person.__dict__
             db_dict = person.__dict__
             del db_dict['_sa_instance_state']

@@ -10,10 +10,7 @@ from flask.ext.script import Manager
 from CRUD import create_app, db
 
 app = create_app(os.getenv('FLASK_CONFIG') or 'default')
-
-
 manager = Manager(app)
-
 
 #decorating run() with manager.command in order to add a command to a Flask-script Manager object
 @manager.command
@@ -24,13 +21,48 @@ def run():
 # importing the database.py module from the blog package you created
 #from CRUD.database import session, Person
 
+COV = None
+if os.environ.get('FLASK_COVERAGE'):
+    import coverage
+    #COV = coverage.coverage(branch=True, include='CRUD/*')
+    COV = coverage.coverage(branch=True, include='CRUD/*')
+    COV.start()
 
 @manager.command
-def test():
-    """ Run unit tests """
+def test(coverage=False):
+    """ Run unit tests:
+            $ python manage.py test
+        Run with coverage:
+            $ python manage.py test --coverage 
+        This will make coverage=True
+    *Because all code in global scope is already run by the time coverage option
+    is received in test(), we are re-running the entire script via os.execvp()
+    """
+
+    if coverage and not os.environ.get('FLASK_COVERAGE'):
+        import sys
+        os.environ['FLASK_COVERAGE'] = '1'
+        
+        
+    # this line re-runs the entire command and script
+        # ['sys.executable'] == ['/usr/local/opt/python/bin/python2.7']
+        # sys.argv == ['manage.py', 'test', '--coverage']
+        os.execvp(sys.executable, [sys.executable] + sys.argv)
+
     import unittest
     tests = unittest.TestLoader().discover('tests')
     unittest.TextTestRunner(verbosity=2).run(tests)
+
+    if COV:
+        COV.stop()
+        COV.save()
+        print('Coverage Summary:')
+        COV.report()
+        basedir = os.path.abspath(os.path.dirname(__file__))
+        covdir = os.path.join(basedir, 'tmp/coverage')
+        COV.html_report(directory=covdir)
+        print('HTML version: file://%s/index.html' % covdir)
+        COV.erase()
 
 
 
