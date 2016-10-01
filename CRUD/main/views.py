@@ -54,6 +54,8 @@ def addperson():
             del db_dict['_sa_instance_state']
             display_entries[count] = db_dict
             count += 1
+	
+	return render_template("addperson.html")
 
     return render_template("addperson.html")
 
@@ -143,11 +145,9 @@ def searchpeople(page=1):
 
     # DELETE request handler
     if request.method == "POST":
-        if "delete_id" in request.form:
-            print("inside if")
-            print(request.form)
-            print(request.get_data())
-            person_to_delete = request.form["delete_id"]
+	form = request.get_json()
+	if "delete_id" in form:
+	    person_to_delete = form["delete_id"]
             delete_person_by_id = db.session.query(
                 Person).filter_by(id=person_to_delete).delete()
             db.session.commit()
@@ -162,27 +162,31 @@ def searchpeople(page=1):
 
         else:
             print("making update to entry")
-            print(request.form)
-            print(request.get_data())
+	    
+	    # get json form data
+	    form = request.get_json()
+	    print(form)
+	    id = form["db_id"]
+	    print(id)
 
-            id = request.form["db_id"]
+	    #id = request.form["db_id"]
 
             # checking for values in the submitted form
-            if request.form["firstname"] != '':
+            if form["firstname"] != '':
                 update_dbentry = db.session.query(Person).filter_by(id=id).update(
-                    {"firstname": "%s" % (request.form["firstname"])})
+                    {"firstname": "%s" % (form["firstname"])})
 
-            if request.form["lastname"] != '':
+            if form["lastname"] != '':
                 update_dbentry = db.session.query(Person).filter_by(id=id).update(
-                    {"lastname": "%s" % (request.form["lastname"])})
+                    {"lastname": "%s" % (form["lastname"])})
 
-            if request.form["DOB"] != '':
+            if form["DOB"] != '':
                 update_dbentry = db.session.query(Person).filter_by(
-                    id=id).update({"dob": "%s" % (request.form["DOB"])})
+                    id=id).update({"dob": "%s" % (form["DOB"])})
 
-            if request.form["zipcode"] != '':
+            if form["zipcode"] != '':
                 update_dbentry = db.session.query(Person).filter_by(id=id).update(
-                    {"zipcode": "%s" % (request.form["zipcode"])})
+                    {"zipcode": "%s" % (form["zipcode"])})
 
             # getting updated entry to pass back to Ajax caller, which will
             # pass to vue to update item
@@ -190,8 +194,10 @@ def searchpeople(page=1):
             db.session.commit()
 
             updated_entry = {}
-            vueEntryIndex = request.form["vue_page_index"]
-            updated_entry["entry_vue_page_$index"] = vueEntryIndex
+            #vueEntryIndex = request.form["vue_page_index"]
+            vueEntryIndex = form["vue_page_index"]
+	    
+	    updated_entry["entry_vue_page_$index"] = vueEntryIndex
 
             get_updated_entry = db.session.query(Person).filter_by(id=id)
             for result in get_updated_entry:
@@ -278,24 +284,6 @@ def searchpeople(page=1):
         #                       total_pages=total_pages
         #                       )
 
-
-@main.route('/searchresults/<string:search_Person>')
-def searchresults(search_Person):
-    # print(request.args.get('search_for_input'))
-
-    print(search_Person)
-
-    # for results in search_Person:
-    #    print(results.__dict__)
-    #    print(results.__dict__["firstname"])
-
-    return render_template('searchresults.html')
-
-
-@main.route("/viewpeople/")
-def viewpeople():
-    #view all people in db
-    return render_template('viewpeople.html')
 
 
 @main.route("/vuetest/")

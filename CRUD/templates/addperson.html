@@ -191,8 +191,10 @@
     	XHR.addEventListener("load", function(event) {
 			console.log(event.target.responseText);
 			//location.href = "http://0.0.0.0:8080/addperson/";
-		    $("#app").hide();
-			//$("#success").append("<h1>person has been added</h1>");
+		    //$("#app").hide();
+            document.getElementById("app").style.display = "none";
+
+			///$("#success").append("<h1>person has been added</h1>");
 			$("#success").load('http://0.0.0.0:8080/successconfirm/');
     	});
 
@@ -207,10 +209,10 @@
 
 		var csrftoken = "{{ csrf_token() }}";
 
-		// request header
+		// building request header
 	    XHR.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-		//XHR.setRequestHeader("X-CSRFToken", csrftoken);
-			
+		XHR.setRequestHeader("X-CSRFToken", csrftoken);
+
 		// The data sent are the one the user provide in the form
 	    XHR.send(FD);
 
