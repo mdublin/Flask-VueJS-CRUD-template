@@ -3,3 +3,6 @@ A simple Flask application that employs some Vue.js, includes delimiter alterati
 To run: 
 `python manage.py run`
 
+Test:
+`python manage.py test --coverage`
+
