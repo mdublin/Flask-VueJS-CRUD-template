@@ -89,7 +89,6 @@ six==1.10.0
 splinter==0.7.3
 SQLAlchemy==1.0.14
 termcolor==1.1.0
-vboxapi==1.0
 virtualenv==13.1.2
 visitor==0.1.2
 webassets==0.11.1
