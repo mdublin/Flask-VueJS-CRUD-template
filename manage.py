@@ -9,6 +9,9 @@ from flask.ext.script import Manager
 #from CRUD import app
 from CRUD import create_app, db
 
+from CRUD.database import Person
+
+
 app = create_app(os.getenv('FLASK_CONFIG') or 'default')
 manager = Manager(app)
 
@@ -72,10 +75,12 @@ def test(coverage=False):
 @manager.command
 def seed():
     '''
+    $ python manage.py seed
+
     populates CRUD db with dummy data crated here:
         http://www.generatedata.com/
     '''
-    with open('dummy_data.json', 'r') as dummy_data:
+    with open('CRUD/dummy_data.json', 'r') as dummy_data:
         data = json.load(dummy_data)
 
     for index, item in enumerate(data):
@@ -85,12 +90,10 @@ def seed():
             dob = item["dob"],
             zipcode = item["postalcode"]
         )
-        session.add(entry)
-    session.commit()
+        db.session.add(entry)
+    db.session.commit()
 
 
-# this runs our seed() command:
-# $ python manage.py seedi
 
 #from flask.ext.migrate import Migrate, MigrateCommand
 #from blog.database import Base

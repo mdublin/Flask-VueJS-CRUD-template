@@ -285,6 +285,30 @@ def searchpeople(page=1):
         #                       )
 
 
+###############################TEST VIEWS####################################
+
+@main.route('/shutdown')
+def server_shutdown():
+    """
+    For acceptance testing with Selenium.
+    The test_selenium.py test starts dev server on background thread while
+    tests run on main thread.
+
+    server_shutdown() gracefully shuts down the server after all test have completed
+    so that coverage engine can do its thing. Because server is running
+    on its own thread, only way to shutdown shut is by sending HTTP request
+    This route only works in testing mode.
+ 
+    """
+    
+    if not current_app.testing:
+	abort(404)
+    shutdown = request.environ.get('werkzeug.server.shutdown')
+    if not shutdown:
+	abort(500)
+    shutdown()
+    return "Shutting down server..."
+
 
 @main.route("/vuetest/")
 def vuetest():

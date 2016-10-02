@@ -7,10 +7,10 @@ from sqlalchemy.orm import relationship
 
 # import the app Flask object from the blog package, courtesy of __init__.py
 from . import db
-
 # engine object is created to as an object that talks to the db at the db URI specified in config.py
 
-#engine = create_engine(app.config["SQLALCHEMY_DATABASE_URI"])
+
+#engine = create_engine(CRUD.config["SQLALCHEMY_DATABASE_URI"])
 #Base = declarative_base()
 #Session = sessionmaker(bind=engine)
 #session = Session()
@@ -18,7 +18,7 @@ from . import db
 import datetime
 #from sqlalchemy import Column, Integer, String, Text, DateTime
 #from .database import Base, engine
-
+import json
 
 class Person(db.Model):
     __tablename__ = "Persons"
@@ -29,5 +29,25 @@ class Person(db.Model):
     dob = db.Column(db.String(10))
     zipcode = db.Column(db.String(20))
 
+    # populate database with fake users
+    @staticmethod
+    def seed():
+        """
+        same method that's in manage.py
+        """
+        with open('dummy_data.json', 'r') as dummy_data:
+            data = json.load(dummy_data)
+        for index, item in enumerate(data):
+            entry = Person(
+                firstname = item["firstname"],
+                lastname = item["lastname"],
+                dob = item["dob"],
+                zipcode = item["postalcode"]
+            )
+            db.session.add(entry)
+        db.session.commit()
+    
+        
 #Base.metadata.create_all(engine)
+
 
