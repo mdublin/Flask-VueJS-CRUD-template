@@ -2,7 +2,7 @@
 from . import main
 from .. import db
 
-from flask import render_template, jsonify, url_for, request, redirect, current_app
+from flask import render_template, jsonify, url_for, request, redirect, current_app, abort
 
 from ..database import Person
 from sqlalchemy import select, or_, and_
@@ -303,10 +303,13 @@ def server_shutdown():
     
     if not current_app.testing:
 	abort(404)
+        print ("ABORT 404!!!!")
     shutdown = request.environ.get('werkzeug.server.shutdown')
     if not shutdown:
 	abort(500)
+        print("ABORT 500!!!")
     shutdown()
+    print "Shutting down server..."
     return "Shutting down server..."
 
 
