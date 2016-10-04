@@ -16,10 +16,10 @@ app = create_app(os.getenv('FLASK_CONFIG') or 'default')
 manager = Manager(app)
 
 #decorating run() with manager.command in order to add a command to a Flask-script Manager object
-@manager.command
-def run():
-    port = int(os.environ.get('PORT', 8080)) #environ dictionary from os to get access to environment variables
-    app.run(host='0.0.0.0', port=port)
+#@manager.command
+#def run():
+#    port = int(os.environ.get('PORT', 8080)) #environ dictionary from os to get access to environment variables
+#    app.run(host='0.0.0.0', port=port)
 
 # importing the database.py module from the blog package you created
 #from CRUD.database import session, Person
