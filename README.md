@@ -14,7 +14,8 @@ Step 4. Create csrf token using:
         `>>> import os`
         `>>> os.urandom(24)`
 
-        and set using environment variable `$ export CRUD_SECRET_KEY='{generated token}'`
+        and set using environment variable `$ export CRUD_SECRET_KEY={generated token}`
+
 
 To run:
 
