@@ -10,11 +10,11 @@ Step 2. Install dependencies with `$ pip install -r requirements/requirements.tx
 
 Step 3. Create postgres databases with `$ createdb CRUD` and `$ createdb CRUD-test`
 
-Step 4. Create csrf token using with:
+Step 4. Create csrf token using with
         `>>> import os`
         `>>> os.urandom(24)`
 
-        and set using environment variable:
+        and set using environment variable
 
         `$ export CRUD_SECRET_KEY={generated token}`
 
