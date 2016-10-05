@@ -151,7 +151,6 @@ class SeleniumTestCase(unittest.TestCase):
         
         #self.assertTrue('Lamar Lou' in self.client.page_source)
 
-        
         self.client.get('http://localhost:5000/searchpeople')
         time.sleep(2)
         self.client.find_element_by_name('search_for').send_keys('Lamar')

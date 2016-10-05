@@ -156,10 +156,6 @@ def searchpeople(page=1):
                 'delete_confirmation': 'id: {}'.format(person_to_delete)}
             return jsonify(confirm_message)
 
-            # return render_template(
-            #    "searchpeople.html",
-            #    deleteconfirmation=deleteconfirmation)
-
         else:
             print("making update to entry")
 	    
@@ -168,8 +164,6 @@ def searchpeople(page=1):
 	    print(form)
 	    id = form["db_id"]
 	    print(id)
-
-	    #id = request.form["db_id"]
 
             # checking for values in the submitted form
             if form["firstname"] != '':
@@ -274,16 +268,6 @@ def searchpeople(page=1):
         print(display_entries)
 
         return(jsonify(display_entries))
-
-        # return render_template("searchpeople.html",
-        #                       people=search_results,
-        #                       search_for=search_query,
-        #                       has_next=has_next,
-        #                       has_prev=has_prev,
-        #                       page=page,
-        #                       total_pages=total_pages
-        #                       )
-
 
 ###############################TEST VIEWS####################################
 
