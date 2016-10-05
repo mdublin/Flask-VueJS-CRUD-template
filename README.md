@@ -2,7 +2,7 @@
 
 A simple CRUD Flask application that employs some Vue.js (includes delimiter alterations to not cause delimiter collisions with Jinja2).
 
-Setup:
+**Setup**:
 
 Step 1. Install virtualenv with `$ virtualenv env`
 
@@ -14,7 +14,7 @@ To run:
 
 `$ python manage.py runserver`
 
-Test:
+**Test**:
 
 `$ python manage.py test --coverage`
 
