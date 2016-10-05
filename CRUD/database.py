@@ -20,6 +20,12 @@ import datetime
 #from .database import Base, engine
 import json
 
+import os
+#using abspath here for json file so that selenium_test.py can run Person.seed()
+# or else you get IOError 2 file does not exist
+dummy_file = os.path.abspath("CRUD/dummy_data.json")
+
+
 class Person(db.Model):
     __tablename__ = "Persons"
 
@@ -35,7 +41,7 @@ class Person(db.Model):
         """
         same method that's in manage.py
         """
-        with open('dummy_data.json', 'r') as dummy_data:
+        with open(dummy_file, 'r') as dummy_data:
             data = json.load(dummy_data)
         for index, item in enumerate(data):
             entry = Person(

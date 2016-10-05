@@ -47,18 +47,7 @@ class SeleniumTestCase(unittest.TestCase):
             # create the database and populate with some fake data
             db.create_all()
             Person.seed()
-            #Role.insert_roles()
-            #User.generate_fake(10)
-            #Post.generate_fake(10)
-
-            # add an administrator user
-            #admin_role = Role.query.filter_by(permissions=0xff).first()
-            #admin = User(email='john@example.com',
-            #             username='john', password='cat',
-            #             role=admin_role, confirmed=True)
-            #db.session.add(admin)
-            #db.session.commit()
-
+            
             # start the Flask server in a thread
             threading.Thread(target=cls.app.run).start()
             
@@ -111,7 +100,7 @@ class SeleniumTestCase(unittest.TestCase):
 
         # add person
         self.client.find_element_by_name('firstname').\
-            send_keys('Buggy')
+            send_keys('Chip')
         self.client.find_element_by_name('lastname').send_keys('Lou') 
         self.client.find_element_by_name('DOB').send_keys('09/12/1988')
         self.client.find_element_by_name('postalCode').send_keys('12345')
@@ -133,6 +122,42 @@ class SeleniumTestCase(unittest.TestCase):
         # navigate to the search person
         self.client.find_element_by_link_text('Search People').click()
         time.sleep(5)
+        # confirm browser has loaded /searchperson
         self.assertTrue('<a>Search by first name, last name, DOB, or postal code</a>' in self.client.page_source)
+
+        # enter name in search field
+        self.client.find_element_by_name('search_for').send_keys('Chip')
+        self.client.find_element_by_name('submit').click()
+        time.sleep(3)
+        # assert for correct result loaded
+        #self.assertTrue('<a class="list-group-item active" href="#"<b>Name:</b>Chip Lou</a>' in self.client.page_source)
+
+        self.assertTrue('<b>Name:</b>' in self.client.page_source)
+ 
+
+        # test update
+        self.client.find_element_by_name('updateButton -- 0').click()
+        time.sleep(1)
+        self.client.find_element_by_name('firstname').send_keys('Lamar')
+        self.client.find_element_by_name('updatesubmit').click()
+        time.sleep(2)
+        self.assertTrue('Lamar Lou' in self.client.page_source)
+
+        # test delete
+        self.client.find_element_by_name('deleteButton -- 0').click()
+        time.sleep(1)
+        self.client.find_element_by_name('deletesubmit').click()
+        time.sleep(3)
+        
+        #self.assertTrue('Lamar Lou' in self.client.page_source)
+
+        
+        self.client.get('http://localhost:5000/searchpeople')
+        time.sleep(2)
+        self.client.find_element_by_name('search_for').send_keys('Lamar')
+        self.client.find_element_by_name('submit').click()
+        time.sleep(3)
+        self.assertFalse('Lamar Lou' in self.client.page_source)
+
 
 

@@ -83,19 +83,3 @@ def create_app(config_name):
     return app
 
 
-
-# this is original app object
-#app = Flask(__name__)
-#csrf.init_app(app)
-
-# blog.config.DevelopmentConfig is calling to the DevelopmentConfig() class in config.py, a class that contains the SQLAlchemy db URI, etc
-
-#config_path = os.environ.get("CONFIG_PATH", "CRUD.config.DevelopmentConfig")
-#print config_path
-
-#app.config.from_object(config_path)
-
-
-
-
-
